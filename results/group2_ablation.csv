@@ -1,0 +1,6 @@
+﻿auth_success_rate,avg_similarity,use_pls,use_session_binding,use_zkp,variant
+1.0,0.9729625406955064,1.0,1.0,1.0,full
+1.0,0.9702058283936693,1.0,1.0,0.0,no_zkp
+1.0,1.0,0.0,1.0,1.0,no_pls
+1.0,0.9722285153890945,1.0,0.0,1.0,no_session_binding
+1.0,1.0,0.0,0.0,0.0,pqc_only

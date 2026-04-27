@@ -1,0 +1,8 @@
+﻿# ZKP-PQC-PLS 融合架构 IoV 安全认证
+# Python >= 3.9
+
+dilithium-py>=1.4.0
+cryptography>=41.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+matplotlib>=3.8.0

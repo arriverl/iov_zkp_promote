@@ -1,0 +1,5 @@
+﻿attack,notes,success_rate
+replay,1.0,0.0
+certificate_theft_impersonation,0.0,0.05
+remote_relay,0.5270847769634796,0.0
+message_tampering_mitm,0.0,0.0

@@ -1,0 +1,12 @@
+﻿{
+  "profile": "fast",
+  "rounds": 20,
+  "pqc_level": 2,
+  "zkp_challenge_bytes": 16,
+  "pls": {
+    "csi_dim": 16,
+    "threshold": 0.9,
+    "noise_std": 0.08
+  },
+  "scalability_vehicle_counts": [20, 50, 100]
+}

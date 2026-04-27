@@ -1,0 +1,12 @@
+﻿{
+  "profile": "balanced",
+  "rounds": 30,
+  "pqc_level": 2,
+  "zkp_challenge_bytes": 32,
+  "pls": {
+    "csi_dim": 32,
+    "threshold": 0.88,
+    "noise_std": 0.06
+  },
+  "scalability_vehicle_counts": [50, 100, 200]
+}

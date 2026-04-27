@@ -1,0 +1,12 @@
+﻿{
+  "profile": "high_security",
+  "rounds": 20,
+  "pqc_level": 3,
+  "zkp_challenge_bytes": 32,
+  "pls": {
+    "csi_dim": 64,
+    "threshold": 0.9,
+    "noise_std": 0.05
+  },
+  "scalability_vehicle_counts": [50, 100, 300]
+}
