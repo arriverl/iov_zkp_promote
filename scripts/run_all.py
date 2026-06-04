@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import csv
@@ -21,6 +21,7 @@ from benchmarks.run_benchmarks import (
 )
 from src.ablation import run_ablation_study
 from src.attacks import run_attack_suite
+from src.config import protocol_from_config
 from src.protocol import FusionAuthProtocol, IoVAuthFrame
 
 
@@ -36,10 +37,10 @@ def _write_csv(path: Path, rows: Iterable[Dict[str, object]]) -> None:
         writer.writerows(rows)
 
 
-def _run_main_comparison() -> List[Dict[str, object]]:
-    b = benchmark_baseline_yang()
-    i = benchmark_improved_ecdh_aes()
-    n = benchmark_fusion_protocol()
+def _run_main_comparison(config: Dict[str, object]) -> List[Dict[str, object]]:
+    b = benchmark_baseline_yang(config)
+    i = benchmark_improved_ecdh_aes(config)
+    n = benchmark_fusion_protocol(config)
     return [
         {"protocol": "baseline_yang", **b},
         {"protocol": "improved_ecdh_aes", **i},
@@ -47,7 +48,9 @@ def _run_main_comparison() -> List[Dict[str, object]]:
     ]
 
 
-def _run_sensitivity(rounds: int = 12) -> List[Dict[str, object]]:
+def _run_sensitivity(config: Dict[str, object], rounds: int = 12) -> List[Dict[str, object]]:
+    pls_cfg = config.get("pls", {})
+    default_noise = float(pls_cfg.get("noise_std", 0.05))
     rows: List[Dict[str, object]] = []
     csi_dims = [16, 32, 64]
     thresholds = [0.85, 0.9]
@@ -60,7 +63,8 @@ def _run_sensitivity(rounds: int = 12) -> List[Dict[str, object]]:
                     pqc_level=pqc_level,
                     pls_csi_dim=csi_dim,
                     pls_threshold=th,
-                    pls_noise_std=0.05,
+                    pls_noise_std=default_noise,
+                    pls_use_float32=bool(pls_cfg.get("use_float32", True)),
                 )
                 protocol.obu_setup()
                 lat = []
@@ -91,9 +95,13 @@ def _run_sensitivity(rounds: int = 12) -> List[Dict[str, object]]:
     return rows
 
 
-def _run_scalability(vehicle_counts: List[int], rounds_each: int = 3) -> List[Dict[str, object]]:
+def _run_scalability(
+    config: Dict[str, object],
+    vehicle_counts: List[int],
+    rounds_each: int = 3,
+) -> List[Dict[str, object]]:
     rows: List[Dict[str, object]] = []
-    protocol = FusionAuthProtocol()
+    protocol = protocol_from_config(config)
     protocol.obu_setup()
 
     for n in vehicle_counts:
@@ -136,29 +144,32 @@ def run_all(config_profile: str = "balanced") -> None:
 
     print(f"[RUN] profile={config_profile}")
 
+    proto = protocol_from_config(config)
+    rounds = int(config.get("rounds", 30))
+
     # Group 1: 主对比
-    g1 = _run_main_comparison()
+    g1 = _run_main_comparison(config)
     _write_csv(results_dir / "group1_main_comparison.csv", g1)
     print("[OK] group1_main_comparison.csv")
 
     # Group 2: 消融
-    g2 = run_ablation_study(rounds=int(config.get("rounds", 30)))
+    g2 = run_ablation_study(rounds=rounds, protocol=proto)
     _write_csv(results_dir / "group2_ablation.csv", g2)
     print("[OK] group2_ablation.csv")
 
     # Group 3: 攻击
-    g3 = run_attack_suite(rounds=int(config.get("rounds", 30)))
+    g3 = run_attack_suite(rounds=rounds, protocol=protocol_from_config(config))
     _write_csv(results_dir / "group3_attacks.csv", g3)
     print("[OK] group3_attacks.csv")
 
     # Group 4: 参数敏感性
-    g4 = _run_sensitivity(rounds=max(8, int(config.get("rounds", 30) // 2)))
+    g4 = _run_sensitivity(config, rounds=max(8, rounds // 2))
     _write_csv(results_dir / "group4_sensitivity.csv", g4)
     print("[OK] group4_sensitivity.csv")
 
     # Group 5: 规模实验
     counts = list(config.get("scalability_vehicle_counts", [50, 100, 200]))
-    g5 = _run_scalability(counts, rounds_each=2)
+    g5 = _run_scalability(config, counts, rounds_each=2)
     _write_csv(results_dir / "group5_scalability.csv", g5)
     print("[OK] group5_scalability.csv")
 

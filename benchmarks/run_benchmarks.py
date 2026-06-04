@@ -25,14 +25,21 @@ from src.evaluation.security_rubric import (
 )
 
 
-def _rounds():
+def _rounds(config: dict | None = None) -> int:
+    if config:
+        return int(config.get("benchmark_rounds", config.get("rounds", 50)))
     return 50
 
 
-def benchmark_fusion_protocol() -> dict:
+def benchmark_fusion_protocol(config: dict | None = None) -> dict:
     """融合协议单轮认证延迟与通信开销。"""
-    protocol = FusionAuthProtocol()
+    if config:
+        from src.config import protocol_from_config
+        protocol = protocol_from_config(config)
+    else:
+        protocol = FusionAuthProtocol()
     protocol.obu_setup()
+    n_rounds = _rounds(config)
     frm = IoVAuthFrame.fresh(b"RSU-BENCH-001")
     req = protocol.obu_build_request(frame=frm)
 
@@ -43,17 +50,21 @@ def benchmark_fusion_protocol() -> dict:
     csi_bytes = req["reported_csi"].nbytes
     total_bytes = len(req["message"]) + pk_len + sig_len + zkp_comm + csi_bytes
 
-    latencies = []
-    for _ in range(_rounds()):
-        # 每轮生成新会话帧，避免被 replay guard 快速拒绝而低估真实认证时延。
+    rsu_latencies = []
+    e2e_latencies = []
+    for _ in range(n_rounds):
+        t0 = time.perf_counter()
         req_i = protocol.obu_build_request(frame=IoVAuthFrame.fresh(b"RSU-BENCH-001"))
         r = protocol.rsu_verify(req_i)
-        latencies.append(r.latency_ms)
+        e2e_latencies.append((time.perf_counter() - t0) * 1000)
+        rsu_latencies.append(r.latency_ms)
 
     return {
-        "latency_ms_mean": statistics.mean(latencies),
-        "latency_ms_median": statistics.median(latencies),
-        "latency_ms_stdev": statistics.stdev(latencies) if len(latencies) > 1 else 0,
+        "latency_ms_mean": statistics.mean(rsu_latencies),
+        "latency_ms_median": statistics.median(rsu_latencies),
+        "latency_ms_stdev": statistics.stdev(rsu_latencies) if len(rsu_latencies) > 1 else 0,
+        "e2e_latency_ms_mean": statistics.mean(e2e_latencies),
+        "e2e_latency_ms_median": statistics.median(e2e_latencies),
         "comm_bytes_total": total_bytes,
         "comm_bytes_pk": pk_len,
         "comm_bytes_sig": sig_len,
@@ -62,14 +73,15 @@ def benchmark_fusion_protocol() -> dict:
     }
 
 
-def benchmark_baseline_yang() -> dict:
+def benchmark_baseline_yang(config: dict | None = None) -> dict:
+    n_rounds = _rounds(config)
     """
     基线协议 (Yang et al. 2023) 模拟：仅 ECC 类签名 + XOR，无 PQC/ZKP/PLS。
     假设单次 ECC 签名+验证约 0.05–0.1 ms 量级，通信约 256 B。
     """
     # 模拟：极快但无抗量子、隐私弱
     latencies = []
-    for _ in range(_rounds()):
+    for _ in range(n_rounds):
         t0 = time.perf_counter()
         # 模拟 ECC 签名+验证
         time.sleep(0.00008)  # ~0.08 ms
@@ -82,13 +94,14 @@ def benchmark_baseline_yang() -> dict:
     }
 
 
-def benchmark_improved_ecdh_aes() -> dict:
+def benchmark_improved_ecdh_aes(config: dict | None = None) -> dict:
+    n_rounds = _rounds(config)
     """
     改进协议 (ECDH+AES) 模拟：密钥交换 + 对称加密，无 PQC，假名机制。
     假设约 2–3 ms，512 B。
     """
     latencies = []
-    for _ in range(_rounds()):
+    for _ in range(n_rounds):
         t0 = time.perf_counter()
         time.sleep(0.00255)  # ~2.55 ms
         latencies.append((time.perf_counter() - t0) * 1000)

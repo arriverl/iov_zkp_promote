@@ -27,21 +27,24 @@ class CSIFingerprintModel:
     seed: Optional[int] = None
 
 
-def _rayleigh_fading(n: int, num_paths: int, decay: float, rng: np.random.Generator) -> np.ndarray:
+def _rayleigh_fading(
+    n: int,
+    num_paths: int,
+    decay: float,
+    rng: np.random.Generator,
+    *,
+    jitter_scale: float = 0.1,
+) -> np.ndarray:
     """生成 Rayleigh 衰落的多径信道系数（复数），幅度为实数用于指纹。"""
-    # 多径增益随径索引衰减
     gains = np.exp(-decay * np.arange(num_paths))
     gains = gains / np.sqrt(np.sum(gains ** 2))
-    # 每径随机相位
     phases = rng.uniform(0, 2 * np.pi, num_paths)
     h_paths = gains * np.exp(1j * phases)
-    # 映射到 n 维（如 OFDM 子载波）：线性插值或随机线性组合
     if n >= num_paths:
         idx = np.linspace(0, num_paths - 1, n, dtype=int)
-        h = h_paths[idx] + 0.1 * (rng.standard_normal(n) + 1j * rng.standard_normal(n))
+        h = h_paths[idx] + jitter_scale * (rng.standard_normal(n) + 1j * rng.standard_normal(n))
     else:
-        h = h_paths[:n] + 0.1 * (rng.standard_normal(n) + 1j * rng.standard_normal(n))
-    # 指纹取幅度（或幅度+相位统计），与文献一致
+        h = h_paths[:n] + jitter_scale * (rng.standard_normal(n) + 1j * rng.standard_normal(n))
     return np.abs(h)
 
 
@@ -58,19 +61,41 @@ class PLSAuthenticator:
         channel_noise_std: float = 0.05,
         num_multipath: int = 8,
         multipath_decay: float = 0.3,
+        use_float32: bool = True,
+        rel_dist_max: float = 0.42,
         rng: Optional[np.random.Generator] = None,
     ):
         self.threshold = threshold
+        self.rel_dist_max = rel_dist_max
         self.csi_dim = csi_dim
         self.channel_noise_std = channel_noise_std
         self.num_multipath = num_multipath
         self.multipath_decay = multipath_decay
+        self.use_float32 = use_float32
         self._rng = rng or np.random.default_rng()
         self._model = CSIFingerprintModel(
             dim=csi_dim,
             num_multipath=num_multipath,
             decay=multipath_decay,
         )
+        # 异地/中继攻击仿真：明显不同的多径环境，降低随机向量偶然高相关
+        self._remote_multipath = max(num_multipath + 4, 12)
+        self._remote_decay = min(multipath_decay + 0.55, 0.95)
+
+    def session_seed_from_message(self, message: bytes) -> int:
+        import hashlib
+        if not hasattr(self, "_seed_cache"):
+            self._seed_cache: dict[bytes, int] = {}
+        cached = self._seed_cache.get(message)
+        if cached is not None:
+            return cached
+        seed = int.from_bytes(hashlib.sha256(message).digest()[:8], "big")
+        if len(self._seed_cache) < 512:
+            self._seed_cache[message] = seed
+        return seed
+
+    def _dtype(self) -> np.dtype:
+        return np.float32 if self.use_float32 else np.float64
 
     def extract_csi_fingerprint(self, seed: Optional[int] = None) -> np.ndarray:
         """
@@ -83,7 +108,30 @@ class PLSAuthenticator:
             self.num_multipath,
             self.multipath_decay,
             rng,
-        ).astype(np.float64)
+        ).astype(self._dtype())
+
+    def extract_session_csi(self, message: bytes) -> np.ndarray:
+        """同一会话消息绑定种子，OBU/RSU 合法链路一致。"""
+        return self.extract_csi_fingerprint(seed=self.session_seed_from_message(message))
+
+    def extract_remote_csi(self, message: bytes) -> np.ndarray:
+        """异地盗证：不同多径剖面 + 独立种子，与合法 CSI 低相关。"""
+        base = self.session_seed_from_message(message)
+        remote_seed = base ^ 0xA5A5_5A5A_DEAD_BEEF
+        rng = np.random.default_rng(remote_seed)
+        return _rayleigh_fading(
+            self.csi_dim,
+            self._remote_multipath,
+            self._remote_decay,
+            rng,
+            jitter_scale=0.25,
+        ).astype(self._dtype())
+
+    def pack_csi(self, csi: np.ndarray) -> bytes:
+        return np.asarray(csi, dtype=self._dtype()).tobytes()
+
+    def unpack_csi(self, data: bytes) -> np.ndarray:
+        return np.frombuffer(data, dtype=self._dtype()).copy()
 
     def add_channel_noise(self, csi: np.ndarray, noise_std: Optional[float] = None) -> np.ndarray:
         """模拟 RSU 侧测量时的信道噪声（时变、位置微变）。"""
@@ -91,12 +139,17 @@ class PLSAuthenticator:
         return csi + self._rng.normal(0, std, csi.shape)
 
     def compute_similarity(self, fp1: np.ndarray, fp2: np.ndarray) -> float:
-        """皮尔逊相关系数 ρ = Cov(Φ_V, Φ_R) / (σ_V σ_R)。"""
+        """皮尔逊相关系数 ρ（float32 快速路径）。"""
         if fp1.shape != fp2.shape:
             raise ValueError("指纹维度不一致")
-        if np.std(fp1) == 0 or np.std(fp2) == 0:
-            return 1.0 if np.allclose(fp1, fp2) else 0.0
-        return float(np.corrcoef(fp1.ravel(), fp2.ravel())[0, 1])
+        r = np.asarray(fp1, dtype=np.float32).ravel()
+        m = np.asarray(fp2, dtype=np.float32).ravel()
+        r -= r.mean(dtype=np.float32)
+        m -= m.mean(dtype=np.float32)
+        denom = float(np.linalg.norm(r) * np.linalg.norm(m))
+        if denom < 1e-9:
+            return 1.0 if np.allclose(r, m) else 0.0
+        return float(np.dot(r, m) / denom)
 
     def authenticate(
         self,
@@ -110,5 +163,11 @@ class PLSAuthenticator:
         measured_fp: RSU 侧对同一链路测量的 CSI（仿真中 = reported + 噪声）。
         """
         gamma = threshold if threshold is not None else self.threshold
-        rho = self.compute_similarity(reported_fp, measured_fp)
-        return (rho >= gamma, rho)
+        r = np.asarray(reported_fp, dtype=np.float32).ravel()
+        m = np.asarray(measured_fp, dtype=np.float32).ravel()
+        rho = self.compute_similarity(r, m)
+        nr = float(np.linalg.norm(r)) + 1e-9
+        nm = float(np.linalg.norm(m)) + 1e-9
+        rel_dist = float(np.linalg.norm(r / nr - m / nm))
+        ok = rho >= gamma and rel_dist <= self.rel_dist_max
+        return (ok, rho)

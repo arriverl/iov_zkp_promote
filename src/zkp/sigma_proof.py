@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 零知识证明 (ZKP)：证明「拥有与公钥对应的私钥」而不泄露私钥。
 采用 Sigma 协议（Schnorr 型）+ Fiat–Shamir 启发式得到非交互式证明，满足完备性、合理性、零知识性。
@@ -32,8 +32,8 @@ def _hash_to_scalar(data: bytes, length: int = 32) -> bytes:
     return bytes(out[:length])
 
 
-def _domain_separator(tag: str) -> bytes:
-    return f"ZKP-PQC-PLS|{tag}".encode("utf-8")
+_DS_COMMIT = b"ZKP-PQC-PLS|Commit"
+_DS_CHALLENGE = b"ZKP-PQC-PLS|Challenge"
 
 
 class ZKPProver:
@@ -43,7 +43,7 @@ class ZKPProver:
     def commit(self, witness: bytes, public_input: bytes) -> bytes:
         nonce = os.urandom(32)
         w_hash = hashlib.sha256(witness).digest()
-        comm = hashlib.sha256(_domain_separator("Commit") + nonce + w_hash + public_input).digest()
+        comm = hashlib.sha256(_DS_COMMIT + nonce + w_hash + public_input).digest()
         self._nonce = nonce
         self._witness = witness
         self._public_input = public_input
@@ -57,7 +57,7 @@ class ZKPProver:
 
     def prove(self, witness: bytes, public_input: bytes, message: bytes) -> ZKProof:
         comm = self.commit(witness, public_input)
-        challenge = hashlib.sha256(_domain_separator("Challenge") + comm + message + public_input).digest()[: self.challenge_bytes]
+        challenge = hashlib.sha256(_DS_CHALLENGE + comm + message + public_input).digest()[: self.challenge_bytes]
         response = self.respond(challenge)
         return ZKProof(commitment=comm, response=response, challenge_digest=challenge)
 
@@ -67,10 +67,8 @@ class ZKPVerifier:
         self.challenge_bytes = challenge_bytes
 
     def verify(self, public_input: bytes, message: bytes, proof: ZKProof) -> bool:
-        expected = hashlib.sha256(_domain_separator("Challenge") + proof.commitment + message + public_input).digest()[: self.challenge_bytes]
-        if expected != proof.challenge_digest:
-            return False
-        return len(proof.response) == 32
+        expected = hashlib.sha256(_DS_CHALLENGE + proof.commitment + message + public_input).digest()[: self.challenge_bytes]
+        return hmac.compare_digest(expected, proof.challenge_digest) and len(proof.response) == 32
 
 
 def create_zkp_proof_system(challenge_bytes: int = 32) -> Tuple[ZKPProver, ZKPVerifier]:

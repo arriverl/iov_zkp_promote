@@ -1,4 +1,4 @@
-﻿comm_bytes_csi,comm_bytes_pk,comm_bytes_sig,comm_bytes_total,comm_bytes_zkp,latency_ms_mean,latency_ms_median,latency_ms_stdev,protocol,security_note
-,,,256,,0.5467460001818836,0.5216999998083338,,baseline_yang,"ECC, no PQC/ZKP/PLS"
-,,,512,,2.9050000002462184,2.9906499985372648,,improved_ecdh_aes,"ECDH+AES, no PQC, pseudonym"
-512,1312,2420,4414,96,4.8668779996660305,4.81604999913543,0.343476229922376,innovation_zkp_pqc_pls,
+﻿comm_bytes_csi,comm_bytes_pk,comm_bytes_sig,comm_bytes_total,comm_bytes_zkp,e2e_latency_ms_mean,e2e_latency_ms_median,latency_ms_mean,latency_ms_median,latency_ms_stdev,protocol,security_note
+,,,256,,,,0.5496633332465232,0.5473000001074979,,baseline_yang,"ECC, no PQC/ZKP/PLS"
+,,,512,,,,2.997676666624708,3.0133999998724903,,improved_ecdh_aes,"ECDH+AES, no PQC, pseudonym"
+128,1312,2420,4014,80,36.17439000011776,25.811099999828002,5.18974999998439,5.0060499997925945,1.7596332466198177,innovation_zkp_pqc_pls,

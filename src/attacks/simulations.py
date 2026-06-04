@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import statistics
@@ -14,8 +14,11 @@ def _fresh_request(protocol: FusionAuthProtocol, rsu_id: bytes = b"RSU-ATTACK") 
     return protocol.obu_build_request(frame=frame)
 
 
-def run_attack_suite(rounds: int = 30) -> List[Dict[str, float]]:
-    protocol = FusionAuthProtocol()
+def run_attack_suite(
+    rounds: int = 30,
+    protocol: FusionAuthProtocol | None = None,
+) -> List[Dict[str, float]]:
+    protocol = protocol or FusionAuthProtocol()
     protocol.obu_setup()
 
     results: List[Dict[str, float]] = []
@@ -36,7 +39,7 @@ def run_attack_suite(rounds: int = 30) -> List[Dict[str, float]]:
     theft_success = 0
     for _ in range(rounds):
         req = _fresh_request(protocol)
-        fake_remote_csi = protocol.pls.extract_csi_fingerprint(seed=np.random.randint(1, 10_000))
+        fake_remote_csi = protocol.pls.extract_remote_csi(req["message"])
         theft_success += int(protocol.rsu_verify(req, measured_csi=fake_remote_csi).success)
     results.append({
         "attack": "certificate_theft_impersonation",

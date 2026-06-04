@@ -1,12 +1,18 @@
-﻿{
+{
   "profile": "fast",
   "rounds": 20,
   "pqc_level": 2,
   "zkp_challenge_bytes": 16,
+  "pqc_sign_digest": true,
+  "zkp_witness_digest": true,
   "pls": {
     "csi_dim": 16,
     "threshold": 0.9,
-    "noise_std": 0.08
+    "noise_std": 0.08,
+    "use_float32": true,
+    "num_multipath": 4,
+    "rel_dist_max": 0.42
   },
+  "benchmark_rounds": 20,
   "scalability_vehicle_counts": [20, 50, 100]
 }

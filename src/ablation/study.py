@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import statistics
@@ -24,7 +24,7 @@ def _verify_with_toggles(protocol: FusionAuthProtocol, req: dict, *, use_zkp: bo
             ),
         )
 
-    pqc_ok = protocol.pqc.verify(msg, req["signature"], pk)
+    pqc_ok = protocol.pqc.verify(protocol._pqc_payload(msg), req["signature"], pk)
 
     pls_ok = True
     sim = 1.0
@@ -36,7 +36,10 @@ def _verify_with_toggles(protocol: FusionAuthProtocol, req: dict, *, use_zkp: bo
     return {"success": float(success), "similarity": float(sim)}
 
 
-def run_ablation_study(rounds: int = 30) -> List[Dict[str, float]]:
+def run_ablation_study(
+    rounds: int = 30,
+    protocol: FusionAuthProtocol | None = None,
+) -> List[Dict[str, float]]:
     variants = [
         ("full", True, True, True),
         ("no_zkp", False, True, True),
@@ -48,18 +51,21 @@ def run_ablation_study(rounds: int = 30) -> List[Dict[str, float]]:
     outputs: List[Dict[str, float]] = []
 
     for name, use_zkp, use_pls, use_frame in variants:
-        protocol = FusionAuthProtocol()
-        protocol.obu_setup()
+        p = FusionAuthProtocol() if protocol is None else protocol
+        if protocol is None:
+            p.obu_setup()
+        elif p._sk is None:
+            p.obu_setup()
         success = []
         similarities = []
 
         for _ in range(rounds):
             if use_frame:
-                req = protocol.obu_build_request(frame=IoVAuthFrame.fresh(b"RSU-ABL"))
+                req = p.obu_build_request(frame=IoVAuthFrame.fresh(b"RSU-ABL"))
             else:
-                req = protocol.obu_build_request(message=b"STATIC_AUTH_MESSAGE")
+                req = p.obu_build_request(message=b"STATIC_AUTH_MESSAGE")
 
-            result = _verify_with_toggles(protocol, req, use_zkp=use_zkp, use_pls=use_pls)
+            result = _verify_with_toggles(p, req, use_zkp=use_zkp, use_pls=use_pls)
             success.append(result["success"])
             similarities.append(result["similarity"])
 

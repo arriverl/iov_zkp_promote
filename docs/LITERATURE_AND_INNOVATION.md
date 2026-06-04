@@ -125,9 +125,22 @@
 | 文献概念 | 代码/文档 |
 |----------|-----------|
 | 非交互 ZKP、挑战绑定 | `src/zkp/sigma_proof.py` |
-| PQC 签名 | `src/pqc/lattice_signing.py` |
+| PQC 签名（含摘要签名优化） | `src/pqc/lattice_signing.py`, `fusion_protocol._pqc_payload` |
 | CSI 第二因子 | `src/pls/csi_fingerprint.py` |
 | 融合协议 | `src/protocol/fusion_protocol.py` |
 | 会话 freshness / V2X 风格绑定 | `src/protocol/iov_auth_frame.py` |
+| 配置化实验 | `src/config.py`, `configs/balanced.json` |
 | 可解释安全分 | `src/evaluation/security_rubric.py` |
+| **最新实验数据** | `docs/EXPERIMENT_RESULTS.md`, `results/group*.csv` |
 | 本综述 | `docs/LITERATURE_AND_INNOVATION.md` |
+
+### 7.1 与竞品文献的实测对比（`balanced` 配置）
+
+| 指标 | 本仓库原型 | 文献典型（供答辩引用） |
+|------|------------|------------------------|
+| RSU 验证延迟 | **~5 ms** | PQ-TDAA：8.1 ms @10 车（NS-3） |
+| 单次通信 | **~4.0 KB** | PQ-TDAA 证明 ~8 KB；本方案含完整 Dilithium sig |
+| 物理层第二因子 | **有（CSI 仿真）** | PQ-TDAA / Hermes' Seal：通常无 PLS |
+| 盗证+异地攻击成功率 | **0%**（仿真） | 需对照各文威胁模型 |
+
+差异化表述：在 PQ+ZKP 已较多的 2026 文献中，本原型强调 **PQC + Sigma-ZKP + PLS + IoVAuthFrame** 四层融合与可复现攻击实验，而非单一新原语。

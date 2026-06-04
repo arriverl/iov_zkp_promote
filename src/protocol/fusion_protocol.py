@@ -9,6 +9,8 @@ import time
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
+_PQC_BIND_PREFIX = b"PQC-Bind|v1|"
+
 from ..pqc import PQCLatticeSigner
 from ..zkp import ZKPProver, ZKPVerifier, ZKProof
 from ..pls import PLSAuthenticator
@@ -41,8 +43,18 @@ class FusionAuthProtocol:
         pls_threshold: float = 0.85,
         pls_csi_dim: int = 64,
         pls_noise_std: float = 0.05,
+        pls_use_float32: bool = True,
+        pls_num_multipath: int = 8,
+        pls_rel_dist_max: float = 0.42,
         replay_window_ms: int = 5000,
+        pqc_sign_digest: bool = True,
+        zkp_witness_digest: bool = True,
+        replay_cleanup_interval: int = 32,
     ):
+        self.pqc_sign_digest = pqc_sign_digest
+        self.zkp_witness_digest = zkp_witness_digest
+        self._replay_cleanup_interval = max(1, replay_cleanup_interval)
+        self._replay_ops = 0
         self.pqc = PQCLatticeSigner(security_level=pqc_level)
         self.zkp_prover = ZKPProver(challenge_bytes=zkp_challenge_bytes)
         self.zkp_verifier = ZKPVerifier(challenge_bytes=zkp_challenge_bytes)
@@ -50,11 +62,25 @@ class FusionAuthProtocol:
             threshold=pls_threshold,
             csi_dim=pls_csi_dim,
             channel_noise_std=pls_noise_std,
+            use_float32=pls_use_float32,
+            num_multipath=pls_num_multipath,
+            rel_dist_max=pls_rel_dist_max,
         )
         self._pk: Optional[bytes] = None
         self._sk: Optional[bytes] = None
         self.replay_window_ms = replay_window_ms
         self._seen_message_ts: dict[str, float] = {}
+
+    def _pqc_payload(self, message: bytes) -> bytes:
+        """对会话帧做固定域分离哈希后再签名，降低 Dilithium 对长消息的签名耗时。"""
+        if not self.pqc_sign_digest:
+            return message
+        return hashlib.sha256(_PQC_BIND_PREFIX + message).digest()
+
+    def _zkp_witness(self, sk: bytes) -> bytes:
+        if self.zkp_witness_digest:
+            return hashlib.sha256(sk).digest()
+        return sk
 
     def _cleanup_replay_cache(self, now_ms: float) -> None:
         if not self._seen_message_ts:
@@ -69,8 +95,10 @@ class FusionAuthProtocol:
         返回 True 表示命中重放。
         使用 message 哈希作为指纹，在 replay_window_ms 窗口内拒绝重复请求。
         """
-        self._cleanup_replay_cache(now_ms)
-        msg_id = hashlib.sha256(message).hexdigest()
+        self._replay_ops += 1
+        if self._replay_ops % self._replay_cleanup_interval == 0:
+            self._cleanup_replay_cache(now_ms)
+        msg_id = hashlib.sha256(message).digest()
         if msg_id in self._seen_message_ts:
             return True
         self._seen_message_ts[msg_id] = now_ms
@@ -109,22 +137,25 @@ class FusionAuthProtocol:
             self.obu_setup()
         pk, sk = self._pk, self._sk
         msg = self._resolve_message(message, frame)
+        pqc_msg = self._pqc_payload(msg)
+        zkp_w = self._zkp_witness(sk)
 
-        # 1) ZKP：证明拥有与 pk 对应的私钥（public_input = pk）
+        # 1) ZKP：证明持有私钥（witness 默认用 sk 摘要，避免对大密钥重复哈希）
         proof = self.zkp_prover.prove(
-            witness=sk,
+            witness=zkp_w,
             public_input=pk,
             message=msg,
         )
 
-        # 2) PQC 签名
-        signature = self.pqc.sign(msg, sk)
+        # 2) PQC 签名（默认对会话帧摘要签名，验证复杂度与消息长度解耦）
+        signature = self.pqc.sign(pqc_msg, sk)
 
-        # 3) CSI 指纹
-        csi = self.pls.extract_csi_fingerprint()
+        # 3) CSI 指纹（与会话 message 绑定，合法 RSU 可复现同链路特征）
+        csi = self.pls.extract_session_csi(msg)
 
         return {
             "message": msg,
+            "pqc_payload": pqc_msg,
             "pk": pk,
             "zkp_commitment": proof.commitment,
             "zkp_response": proof.response,
@@ -168,20 +199,46 @@ class FusionAuthProtocol:
                 challenge_digest=request["zkp_challenge_digest"],
             ),
         )
-        pqc_ok = self.pqc.verify(msg, request["signature"], pk)
+        if not zkp_ok:
+            latency_ms = (time.perf_counter() - t0) * 1000
+            return AuthResult(
+                success=False,
+                latency_ms=latency_ms,
+                zkp_ok=False,
+                pls_ok=False,
+                pqc_ok=False,
+                pls_similarity=0.0,
+                details="ZKP=FAIL (early exit)",
+            )
 
         reported_csi = request["reported_csi"]
         if measured_csi is not None:
             import numpy as np
             if isinstance(measured_csi, bytes):
-                measured_csi = np.frombuffer(measured_csi, dtype=np.float64)
-            measured = measured_csi
+                measured = self.pls.unpack_csi(measured_csi)
+            else:
+                measured = np.asarray(measured_csi)
         else:
             measured = self.pls.add_channel_noise(reported_csi)
         pls_ok, similarity = self.pls.authenticate(reported_csi, measured)
 
+        if not pls_ok:
+            latency_ms = (time.perf_counter() - t0) * 1000
+            return AuthResult(
+                success=False,
+                latency_ms=latency_ms,
+                zkp_ok=True,
+                pls_ok=False,
+                pqc_ok=False,
+                pls_similarity=float(similarity),
+                details=f"PLS=FAIL (ρ={similarity:.4f}, early exit)",
+            )
+
+        pqc_msg = request.get("pqc_payload") or self._pqc_payload(msg)
+        pqc_ok = self.pqc.verify(pqc_msg, request["signature"], pk)
+
         latency_ms = (time.perf_counter() - t0) * 1000
-        success = zkp_ok and pls_ok and pqc_ok
+        success = pqc_ok
         details = (
             f"ZKP={'PASS' if zkp_ok else 'FAIL'}, "
             f"PQC={'PASS' if pqc_ok else 'FAIL'}, "
