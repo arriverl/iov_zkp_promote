@@ -1,0 +1,53 @@
+--- Slide 1 ---
+ZKP-PQC-PLS 融合架构创新型 IoV 安全认证系统身份认证与访问控制 — 课程小组作业汇报零知识验证 · 后量子密码 · 物理层安全
+
+--- Slide 2 ---
+汇报大纲CONTENTS201项目背景与动机IoV 安全挑战、量子威胁、隐私需求02技术演进与现有方案分析Yang et al. 与改进方案的局限03核心方案：三支柱融合架构PQC + ZKP + PLS 协同设计04关键技术详解后量子签名、零知识证明、CSI 指纹05协议设计与安全机制融合协议流程与会话绑定06实验与评估五组实验、性能、安全性、消融分析07创新定位与总结展望文献定位、路线图、未来工作
+
+--- Slide 3 ---
+项目背景与动机Why ZKP-PQC-PLS?3⚛ 量子威胁Shor 算法可攻破 RSA/ECC 体系传统 PKI 面临长期量子风险NIST 已标准化 ML-DSA (FIPS 204)车联网需紧急迁移至 PQC🔒 隐私需求车辆身份需强匿名与不可追踪假名管理存在单点泄露风险轨迹关联可暴露驾驶行为隐私ZKP 提供最小信息披露认证📡 物理层防御仅数字证书无法防窃取+远程冒充物理信道指纹具有空间唯一性CSI 提供不可转移的第二因子多径特性绑定物理位置与信道
+
+--- Slide 4 ---
+技术演进与现有方案局限性Existing Approaches & Their Limits4方案抗量子隐私物理层主要问题Yang et al. (2023)✗ (ECC)弱 (XOR 泄露)✗量子攻击 + 隐私泄露改进方案 (ECDH+AES)✗ (ECDH)中 (假名)✗非抗量子，依赖中心化本方案 (ZKP-PQC-PLS)✓ (格密码)极高 (ZKP)✓ (CSI)三重融合保障威胁模型覆盖长期密钥泄露→ PQC 抗量子签名身份追踪→ ZKP 匿名证明远程冒充→ PLS CSI 第二因子重放攻击→ IoVAuthFrame 会话绑定
+
+--- Slide 5 ---
+核心方案：三支柱融合架构ZKP-PQC-PLS Architecture Overview5🔐PQC后量子格签名CRYSTALS-DilithiumML-DSA (FIPS 204)基于 SIS/MLWE 问题Dilithium2 (≈128-bit)可配置 3/5 安全级🛡ZKP零知识隐私认证Sigma 协议骨架Fiat-Shamir 非交互证明持有私钥不泄露SHA-256/HMAC 自实现零第三方 ZK 库依赖📶PLS物理层双因子CSI 信道指纹Rayleigh 多径仿真皮尔逊相关系数 ≥ γ默认阈值 γ = 0.85可替换真实 PHY 采集▸ 三重融合 = 抗量子 + 强匿名 + 物理防伪 ◂
+
+--- Slide 6 ---
+PQC 后量子格签名CRYSTALS-Dilithium / ML-DSA6Core Features密码体制基于格 (Lattice-based)安全基础SIS / MLWE 困难问题标准化NIST FIPS 204 (ML-DSA)安全级别Level 2 (≈128-bit 经典安全)密钥大小pk: 1312B, sk: 2528B (L2)签名大小~2420B (L2)实现dilithium-py (教育/研究)生产建议替换为 OQS/liboqs C 后端Why Lattice?量子计算机上无已知多项式时间算法可解格困难问题Shor 算法不适用于格问题（与 RSA/ECC 不同）Dilithium 签名验证速度远超同类候选方案NIST 经过三轮评估选定，社区信任度高数学结构允许构建 Fiat-Shamir 类签名方案同格 ZKP 可进一步增强可证明安全性与现有 PKI 基础设施兼容性良好
+
+--- Slide 7 ---
+ZKP 零知识隐私认证Sigma Protocol + Fiat–Shamir Transform7Sigma 协议流程（知识证明骨架）1Commit证明者生成随机承诺commitment = H(witness, r)→2Challenge验证者发送随机挑战challenge ← {0,1}²⁵⁶→3Response证明者计算响应response = f(witness, challenge)Fiat–Shamir 变换 → 非交互式 ZKP挑战值由证明者自行计算：challenge = Hash(commitment ‖ public_input ‖ message)证明格式：π = (commitment, response, challenge_digest)验证者重算挑战并校验：Commit(public_input, response) = commitment + challenge · public_input优势：无需交互 → 适合 IoV/V2X 高延迟不可靠信道；每次认证生成全新证明，不可链接
+
+--- Slide 8 ---
+PLS 物理层双因子认证CSI Fingerprint as Second Factor8CSI 信道指纹原理CSI (Channel State Information)：描述无线信道多径传播特性空间唯一性：不同位置的信道特征高度不相关时变性：CSI 随时间变化，增加不可预测性本实现：Rayleigh 多径模型仿真 CSI 幅度特征默认维度：64 子载波 × 8 多径匹配算法：皮尔逊相关系数 ρ认证判定：ρ ≥ γ (默认 γ = 0.85)实际部署：可替换为 802.11p / 5G NR CSI 采集数学模型ρ = Cov(Φ_V, Φ_R) / (σ_V · σ_R) ≥ γΦ_V: OBU 上报 CSI    Φ_R: RSU 测量 CSIγ: 认证阈值 (默认 0.85)防御场景证书窃取 + 远程冒充：  异地 CSI 不匹配 → 拒绝中继攻击：  中继改变信道特征 → 降分物理邻近攻击：  不同位置 CSI 高度不相关
+
+--- Slide 9 ---
+融合协议架构与认证流程FusionAuthProtocol — End-to-End Flow9OBU (车辆)① 密钥生成PQC KeyGen → (pk, sk)↓② ZKP 证明prove(witness=sk, public_input=pk, msg)↓③ PQC 签名sign(message, sk) → signature↓④ CSI 提取extract_csi_fingerprint()↓⑤ 构建请求{pk, zkp, sig, csi, msg} → RSU发送RSU (路侧单元)⑥ 重放检测check message hash + time window↓⑦ ZKP 验证verify(pk, msg, proof)↓⑧ PQC 验签verify(msg, signature, pk)↓⑨ CSI 校验authenticate(reported, measured) → ρ↓⑩ 综合判定all pass → Auth PASS ✓
+
+--- Slide 10 ---
+会话绑定：IoVAuthFrameV2X-Style Session Freshness & Replay Defense10IoVAuthFrame 结构设计rsu_idRSU 标识符timestamp认证时间戳 (Unix ms)nonce随机数 (防重放)epoch时间窗口编号防重放机制消息绑定：签名和 ZKP 的 message 输入均绑定 IoVAuthFrame.canonical_bytes()哈希指纹：RSU 维护已见消息的 SHA-256 哈希表，窗口期内拒绝重复时间窗口：默认 5000ms 重放窗口，超时后清理过期条目三重防护：nonce 随机性 + timestamp 时效性 + hash 去重V2X 兼容：字段设计对标 ETSI ITS 报文格式，可无缝对接现有标准
+
+--- Slide 11 ---
+攻击仿真与防御验证Attack Simulation — src/attacks/11🔄 重放攻击旧认证消息重新发送防御：IoVAuthFrame hash 去重拦截🎭 冒充攻击伪造身份发起认证防御：无合法私钥 → ZKP 验证失败🔓 证书窃取盗取合法证书异地认证防御：CSI 指纹位置不匹配 → 拒绝📡 远程中继中继合法信号远程攻击防御：中继引入额外信道失真 → PLS 降分✏ 篡改攻击修改传输中的认证数据防御：PQC 签名完整性校验失败
+
+--- Slide 12 ---
+消融实验：组件贡献度分析Ablation Study — src/ablation/12关键发现完整方案 (95分)三重保障缺一不可去 ZKP (-30分)隐私保护归零，身份可追踪去 PLS (-23分)无法防御远程冒充攻击去会话绑定 (-17分)重放攻击防护失效PQC Only (-50分)仅保留抗量子，其余全面失守
+
+--- Slide 13 ---
+实验评估(一)：性能对比Performance Comparison13🔹 本方案延迟 ~15.42ms，远低于 IoV 实时性阈值 50ms🔹 额外开销（通信 ~1280+ Bytes）在 5G/6G V2X 场景下可接受🔹 安全性从 35/75 分大幅提升至 95 分，以约 2.5 倍延迟换取 3 倍安全提升
+
+--- Slide 14 ---
+实验评估(二)：五组实验设计Five Experimental Groups14实验运行方式一键运行：python scripts/run_all.py balanced（支持 fast / balanced / high_security 三套参数）自动绘图：python scripts/plot_results.py → results/plots/*.png输出结果：results/ 目录下 5 组 CSV + 汇总 summary.csv三档可配置：configs/ 提供不同安全-性能权衡参数集
+
+--- Slide 15 ---
+实验评估(三)：安全性评分Security Rubric & Radar Analysis15可解释安全评分模型后量子抗性30%ZKP 隐私保护25%物理层防伪20%会话绑定15%完整性校验10%加权总分: 95 / 100实现: src/evaluation/security_rubric.py
+
+--- Slide 16 ---
+创新定位与文献调研Innovation & Literature Positioning16相关文献 (2023–2026)Chen et al. (MDPI, 2023) — IoT 零知识认证综述Chen et al. (J Supercomput, 2025) — 区块链+ZKP VANET 匿名认证Hermes' Seal (arXiv, 2026) — V2V zk-SNARK 框架Zhang et al. (Sensors, 2025) — 后量子区块链 IoV 取证NIST CSRC (2024) — PQC 附加签名第二轮IEEE COMST (2025) — V2X 安全与隐私大综述arXiv:2510.08496 — AI-PQC 交通 CPS 韧性本方案定位PQC 层对齐 NIST ML-DSA 路线，格基 IoV 同族ZKP 层Sigma+Fiat-Shamir → 可演进至 zk-SNARKPLS 层CSI 指纹仿真模块，可替换真实 PHY会话层IoVAuthFrame ↔ ETSI ITS 报文字段对照
+
+--- Slide 17 ---
+总结与展望Conclusion & Future Work17研究总结提出并实现了 ZKP-PQC-PLS 三重融合的 IoV 安全认证方案，填补了"抗量子+强匿名+物理防伪"三位一体的空白认证延迟 ~15.42ms，远低于 50ms IoV 实时性阈值；安全性得分 95/100，五维评估全面领先五组实验系统验证：主对比、消融、攻击仿真、灵敏度、可扩展性，具备完整可复现性代码完全开源，docs 含文献调研与创新路线图，适用于研究与教学未来工作短期PQC 替换为 C/OQS 实现，PLS 降维量化，全面使用 IoVAuthFrame 绑定中期引入注册表假名 / 匿名凭证，评估环签名与群签名方案长期将属性编码为电路，用 zk-SNARK 证明，对齐 Hermes' Seal 框架
+
+--- Slide 18 ---
+谢谢！THANK YOUZKP-PQC-PLS 融合架构 · IoV 安全认证身份认证与访问控制 — 课程小组作业GitHub: github.com/arriverl/iov_zkp_promote
