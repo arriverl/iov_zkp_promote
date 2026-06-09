@@ -1,0 +1,3 @@
+﻿auth_success_rate,rounds,scenario
+0.0,30.0,certificate_theft_with_pls
+1.0,30.0,certificate_theft_without_pls

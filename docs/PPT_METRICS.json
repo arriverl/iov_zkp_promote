@@ -1,0 +1,54 @@
+{
+  "profile_hint": "运行 python scripts/run_all.py balanced 后导出",
+  "main_comparison": {
+    "baseline_yang_ms": 0.57,
+    "improved_ecdh_aes_ms": 2.95,
+    "innovation_rsu_ms_mean": 10.97,
+    "innovation_rsu_ms_median": 10.94,
+    "innovation_e2e_ms_mean": 68.56,
+    "innovation_e2e_ms_median": 55.56,
+    "innovation_comm_bytes": 4014,
+    "comm_breakdown": {
+      "pk": 1312,
+      "sig": 2420,
+      "zkp": 80,
+      "csi": 128
+    }
+  },
+  "attacks": {
+    "replay": {
+      "success_rate": 0.0,
+      "notes": "1.0"
+    },
+    "certificate_theft_impersonation": {
+      "success_rate": 0.0,
+      "notes": "0.0"
+    },
+    "remote_relay": {
+      "success_rate": 0.0,
+      "notes": "0.4212458238005638"
+    },
+    "message_tampering_mitm": {
+      "success_rate": 0.0,
+      "notes": "0.0"
+    }
+  },
+  "ablation_benign": {
+    "full": 0.9333333333333333,
+    "no_zkp": 0.8,
+    "no_pls": 1.0,
+    "no_session_binding": 1.0,
+    "pqc_only": 1.0
+  },
+  "security_rubric": {
+    "baseline": 35,
+    "improved": 75,
+    "innovation": 95
+  },
+  "ppt_bullets": {
+    "slide13_rsu": "RSU 验证延迟约 11.0 ms（中位 10.9 ms）",
+    "slide13_e2e": "端到端约 55.6–68.6 ms（含 OBU 签名）",
+    "slide13_comm": "通信约 4014 B（pk+sig+zkp+csi）",
+    "slide11_theft": "证书窃取攻击成功率 0%"
+  }
+}

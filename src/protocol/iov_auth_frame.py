@@ -46,6 +46,12 @@ class IoVAuthFrame:
             nonce=n,
         )
 
+    def epoch_id(self, window_ms: int = 5000) -> int:
+        """由时间戳推导的时间窗口编号（与 PPT 中 epoch 字段语义一致，便于 RSU 策略分区）。"""
+        if window_ms <= 0:
+            raise ValueError("window_ms 必须为正")
+        return self.timestamp_unix_ms // window_ms
+
     def canonical_bytes(self) -> bytes:
         """
         确定性编码，用作 Dilithium 签名消息与 ZKP 的 message 绑定。

@@ -91,6 +91,13 @@ python scripts/plot_results.py
 
 ---
 
+## 完整学术论文
+
+| 资源 | 说明 |
+|------|------|
+| [docs/paper/ZKP-PQC-PLS_IoV_学术论文.md](docs/paper/ZKP-PQC-PLS_IoV_学术论文.md) | **整合版论文**（摘要、10 图、实验、参考文献） |
+| `python scripts/generate_paper_figures.py` | 生成 `docs/paper/figures/fig1–fig10.png` |
+
 ## 文档索引
 
 | 文档 | 内容 |
@@ -100,6 +107,9 @@ python scripts/plot_results.py
 | [docs/RESEARCH_REPORT.md](docs/RESEARCH_REPORT.md) | 研究背景、方案与结论 |
 | [docs/LITERATURE_AND_INNOVATION.md](docs/LITERATURE_AND_INNOVATION.md) | 2024–2026 文献与创新定位 |
 | [docs/PPT_REVISION_ANALYSIS.md](docs/PPT_REVISION_ANALYSIS.md) | 汇报 PPT 修改建议 |
+| [docs/PPT_PROJECT_GAP_ANALYSIS.md](docs/PPT_PROJECT_GAP_ANALYSIS.md) | **腾讯文档 PPT 与项目差距分析** |
+| [docs/PPT_SLIDE_COPY.md](docs/PPT_SLIDE_COPY.md) | 可粘贴到腾讯文档的改稿正文 |
+| [docs/PPT_METRICS.md](docs/PPT_METRICS.md) | 自动导出的 PPT 数字速查 |
 | [docs/ppt_extracted.txt](docs/ppt_extracted.txt) | PPT 全文提取 |
 
 ---

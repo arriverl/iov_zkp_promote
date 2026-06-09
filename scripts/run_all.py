@@ -21,6 +21,7 @@ from benchmarks.run_benchmarks import (
 )
 from src.ablation import run_ablation_study
 from src.attacks import run_attack_suite
+from src.attacks.pls_ablation import run_pls_theft_ablation
 from src.config import protocol_from_config
 from src.protocol import FusionAuthProtocol, IoVAuthFrame
 
@@ -180,6 +181,22 @@ def run_all(config_profile: str = "balanced") -> None:
         {"group": 4, "name": "sensitivity", "rows": len(g4)},
         {"group": 5, "name": "scalability", "rows": len(g5)},
     ]
+    # PLS 盗证消融（供 PPT）
+    g_pls = run_pls_theft_ablation(rounds=rounds, protocol=protocol_from_config(config))
+    _write_csv(results_dir / "group_pls_theft_ablation.csv", g_pls)
+    print("[OK] group_pls_theft_ablation.csv")
+
+    try:
+        import importlib.util
+        _m_path = ROOT / "scripts" / "export_ppt_metrics.py"
+        _spec = importlib.util.spec_from_file_location("export_ppt_metrics", _m_path)
+        _mod = importlib.util.module_from_spec(_spec)
+        assert _spec.loader is not None
+        _spec.loader.exec_module(_mod)
+        _mod.write_outputs()
+    except Exception as e:
+        print(f"[WARN] PPT 指标导出跳过: {e}")
+
     _write_csv(results_dir / "summary.csv", summary)
     print("[DONE] 所有五组实验已导出到 results/")
 
