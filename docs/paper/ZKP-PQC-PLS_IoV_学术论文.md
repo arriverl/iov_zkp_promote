@@ -9,6 +9,7 @@
 > **通讯作者：** [邮箱]  
 > **项目仓库：** `iov_zkp_pqc_pls`  
 > **数据与代码：** 完全开源可复现  
+> **公式说明：** 本文使用 **代码块 + Unicode 符号** 书写公式，可在 GitHub / VS Code / 腾讯文档 中正常显示；无需 LaTeX 渲染器。
 
 ---
 
@@ -141,7 +142,9 @@ Hermes' Seal（2026）面向 V2V/V2I 提出 zk-SNARK 框架，强调隐私与 RS
 
 **摘要签名优化：** 对会话帧 `msg = IoVAuthFrame.canonical_bytes()` 计算
 
-$$\text{pqc\_payload} = \text{SHA256}(\texttt{PQC-Bind|v1|} \,\|\, msg)$$
+```
+pqc_payload = SHA256( "PQC-Bind|v1|" || msg )
+```
 
 再执行 `sign(pqc_payload, sk)`，使签名耗时与消息长度解耦。
 
@@ -149,21 +152,21 @@ $$\text{pqc\_payload} = \text{SHA256}(\texttt{PQC-Bind|v1|} \,\|\, msg)$$
 
 采用 **Sigma 协议 + Fiat–Shamir** 非交互化：
 
-1. **Commit：** $C = H(\text{nonce} \| H(w) \| pk)$
-2. **Challenge：** $c = H(C \| msg \| pk)_{[:16]}$
-3. **Response：** $r = \text{HMAC}(K, c \| pk)$，其中 $K = H(w \| \text{nonce})$
+1. **Commit：** `C = H( nonce || H(w) || pk )`
+2. **Challenge：** `c = H( C || msg || pk )` 取前 16 字节
+3. **Response：** `r = HMAC( K, c || pk )`，其中 `K = H( w || nonce )`
 
-证明者以 $w = \text{SHA256}(sk)$ 作为 witness 摘要。验证者重算 $c$ 并校验响应长度与一致性。
+证明者以 `w = SHA256(sk)` 作为 witness 摘要。验证者重算 `c` 并校验响应长度与一致性。
 
 > **说明：** 该实现为**知识证明演示骨架**，完整零知识需明确关系语言与模拟器证明；长期可演进至 zk-SNARK（Groth16/PLONK）。
 
 ### 5.3 物理层安全（PLS）
 
-1. **合法 CSI：** $\Phi_V = \text{Rayleigh}(seed = H(msg))$
-2. **RSU 测量：** $\Phi_R = \Phi_V + \mathcal{N}(0, \sigma^2)$，默认 $\sigma=0.06$
-3. **相似度：** 皮尔逊系数 $\rho(\Phi_V, \Phi_R)$
-4. **归一化距离：** $\| \frac{\Phi_V}{\|\Phi_V\|} - \frac{\Phi_R}{\|\Phi_R\|} \| \le \tau$
-5. **通过条件：** $\rho \ge \gamma$ 且距离 $\le \tau$，balanced 默认 $\gamma=0.88$，$\tau=0.42$
+1. **合法 CSI：** `Φ_V = Rayleigh( seed = H(msg) )`
+2. **RSU 测量：** `Φ_R = Φ_V + 高斯噪声(0, σ²)`，默认 `σ = 0.06`
+3. **相似度：** 皮尔逊系数 `ρ(Φ_V, Φ_R)`
+4. **归一化距离：** `dist = || Φ_V/||Φ_V|| - Φ_R/||Φ_R|| ||`
+5. **通过条件：** `ρ ≥ γ` 且 `dist ≤ τ`，balanced 默认 `γ = 0.88`，`τ = 0.42`
 6. **异地盗证：** 使用独立多径剖面 `extract_remote_csi(msg)`
 
 CSI 默认 **float32**、维度 32，单次通信 128 B。
@@ -172,9 +175,11 @@ CSI 默认 **float32**、维度 32，单次通信 128 B。
 
 规范化编码：
 
-$$\text{msg} = \texttt{dom} \| \texttt{ver} \| \texttt{len(rsu)} \| rsu \| ts \| nonce \| flags$$
+```
+msg = dom || ver || len(rsu) || rsu || ts || nonce || flags
+```
 
-时间窗口编号：$\text{epoch\_id} = \lfloor ts / 5000\text{ms} \rfloor$。Replay Guard 对 `SHA256(msg)` 在 5 s 窗口内去重。
+时间窗口编号：`epoch_id = ts // 5000`（毫秒整除）。Replay Guard 对 `SHA256(msg)` 在 5 s 窗口内去重。
 
 ---
 
@@ -186,20 +191,20 @@ $$\text{msg} = \texttt{dom} \| \texttt{ver} \| \texttt{len(rsu)} \| rsu \| ts \|
 
 **算法1（OBU 侧）**
 
-1. $(pk, sk) \leftarrow \text{KeyGen}()$
-2. $frame \leftarrow \text{IoVAuthFrame.fresh}(rsu\_id)$
-3. $msg \leftarrow frame.\text{canonical\_bytes}()$
-4. $\pi \leftarrow \text{ZKP.prove}(H(sk), pk, msg)$
-5. $\sigma \leftarrow \text{Sign}(H_{pqc}(msg), sk)$
-6. $\Phi_V \leftarrow \text{CSI.session}(msg)$
-7. 发送 $\{pk, \pi, \sigma, \Phi_V, msg\}$
+1. `(pk, sk) ← KeyGen()`
+2. `frame ← IoVAuthFrame.fresh(rsu_id)`
+3. `msg ← frame.canonical_bytes()`
+4. `π ← ZKP.prove( H(sk), pk, msg )`
+5. `σ ← Sign( H_pqc(msg), sk )`
+6. `Φ_V ← CSI.session(msg)`
+7. 发送 `{ pk, π, σ, Φ_V, msg }`
 
 **算法2（RSU 侧）**
 
 1. 若 Replay Guard 命中 → **拒绝**
-2. 若 $\text{ZKP.verify}(pk, msg, \pi)$ 失败 → **拒绝**
-3. 若 $\text{PLS.auth}(\Phi_V, \Phi_R)$ 失败 → **拒绝**
-4. 若 $\text{Verify}(H_{pqc}(msg), \sigma, pk)$ 失败 → **拒绝**
+2. 若 `ZKP.verify(pk, msg, π)` 失败 → **拒绝**
+3. 若 `PLS.auth(Φ_V, Φ_R)` 失败 → **拒绝**
+4. 若 `Verify( H_pqc(msg), σ, pk )` 失败 → **拒绝**
 5. **接受**
 
 ### 6.2 复杂度与开销（定性）
@@ -209,7 +214,7 @@ $$\text{msg} = \texttt{dom} \| \texttt{ver} \| \texttt{len(rsu)} \| rsu \| ts \|
 | OBU ZKP | SHA256/HMAC（亚毫秒级） |
 | OBU PQC Sign | Dilithium（毫秒–十毫秒级，实现相关） |
 | RSU PQC Verify | Dilithium verify（约数毫秒） |
-| PLS | $O(d)$，$d$ 为 CSI 维度 |
+| PLS | O(d)，d 为 CSI 维度 |
 
 ---
 
@@ -284,11 +289,11 @@ python scripts/generate_paper_figures.py
 | no_session_binding | 100% |
 | pqc_only | 100% |
 
-说明：启用 PLS 时，良性路径受 $\gamma$ 与 `rel_dist_max` 影响，通过率略低于 100%；**安全价值应结合攻击实验解读**。
+说明：启用 PLS 时，良性路径受阈值 γ 与 `rel_dist_max` 影响，通过率略低于 100%；**安全价值应结合攻击实验解读**。
 
 ### 7.5 参数敏感性
 
-在 Dilithium2、$\gamma=0.88$ 下，CSI 维度从 16→64，RSU 延迟约 8–9 ms，通信 3961–4153 B。
+在 Dilithium2、γ=0.88 下，CSI 维度从 16→64，RSU 延迟约 8–9 ms，通信 3961–4153 B。
 
 ![图9 参数敏感性](figures/fig9_sensitivity.png)
 
