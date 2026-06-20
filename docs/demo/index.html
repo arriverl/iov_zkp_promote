@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZKP-PQC-PLS 车联网融合身份认证 — 项目展示</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --card: #141b2d;
+      --border: #243049;
+      --text: #e8edf7;
+      --muted: #8b9bb8;
+      --accent: #3b82f6;
+      --pqc: #8b5cf6;
+      --zkp: #06b6d4;
+      --pls: #10b981;
+      --frame: #f59e0b;
+      --danger: #ef4444;
+      --ok: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      background: radial-gradient(ellipse at 50% 0%, #1a2744 0%, var(--bg) 60%);
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p { font-size: 1.15rem; color: var(--muted); max-width: 720px; margin-bottom: 2rem; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-bottom: 2rem; }
+    .pill {
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+    }
+    .pill-pqc { background: rgba(139,92,246,.15); color: #c4b5fd; }
+    .pill-zkp { background: rgba(6,182,212,.15); color: #67e8f9; }
+    .pill-pls { background: rgba(16,185,129,.15); color: #6ee7b7; }
+    .pill-frame { background: rgba(245,158,11,.15); color: #fcd34d; }
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(11,15,26,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
+    }
+    nav a {
+      color: var(--muted); text-decoration: none; font-size: 0.9rem;
+      padding: 0.35rem 0.85rem; border-radius: 6px; transition: .2s;
+    }
+    nav a:hover { color: var(--text); background: var(--card); }
+    main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    section { margin-bottom: 4rem; scroll-margin-top: 4rem; }
+    h2 {
+      font-size: 1.75rem; margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent);
+    }
+    h3 { font-size: 1.15rem; margin: 1.5rem 0 0.75rem; color: #93c5fd; }
+    p, li { color: var(--muted); }
+    li { margin-left: 1.25rem; margin-bottom: 0.4rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .stat {
+      text-align: center; padding: 1.25rem;
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    }
+    .stat .num { font-size: 2rem; font-weight: 700; color: var(--text); }
+    .stat .label { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 0.65rem 0.85rem; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--text); font-weight: 600; }
+    .ok { color: var(--ok); font-weight: 600; }
+    .warn { color: #fbbf24; font-weight: 600; }
+  /* Architecture flow */
+    .flow {
+      display: flex; flex-direction: column; gap: 0;
+      align-items: center; padding: 1rem 0;
+    }
+    .flow-box {
+      width: 100%; max-width: 520px;
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      text-align: center;
+      font-weight: 600;
+      animation: fadeIn .6s ease both;
+    }
+    .flow-box.obu { border-color: var(--accent); background: rgba(59,130,246,.08); }
+    .flow-box.rsu { border-color: var(--pls); background: rgba(16,185,129,.08); }
+    .flow-step { font-size: 0.8rem; color: var(--muted); font-weight: 400; margin-top: 0.35rem; }
+    .flow-arrow { color: var(--muted); font-size: 1.5rem; padding: 0.25rem 0; }
+    .layer-stack { display: flex; flex-direction: column; gap: 0.5rem; }
+    .layer {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 0.85rem 1.25rem; border-radius: 8px; border-left: 4px solid;
+    }
+    .layer-pqc { border-color: var(--pqc); background: rgba(139,92,246,.1); }
+    .layer-zkp { border-color: var(--zkp); background: rgba(6,182,212,.1); }
+    .layer-pls { border-color: var(--pls); background: rgba(16,185,129,.1); }
+    .layer-frame { border-color: var(--frame); background: rgba(245,158,11,.1); }
+    .layer strong { min-width: 4rem; }
+    .chart-wrap { position: relative; height: 320px; margin-top: 1rem; }
+    .chart-wrap.tall { height: 380px; }
+    footer {
+      text-align: center; padding: 2rem; color: var(--muted);
+      border-top: 1px solid var(--border); font-size: 0.85rem;
+    }
+    code {
+      background: #1e293b; padding: 0.15rem 0.45rem; border-radius: 4px;
+      font-size: 0.85rem; color: #7dd3fc;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.75rem; }
+      .chart-wrap { height: 260px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="hero" id="top">
+  <h1>ZKP-PQC-PLS 融合身份认证</h1>
+  <p>面向车联网（IoV/V2X）的后量子密码 + 格零知识证明 + 物理层 CSI 指纹 + 会话绑定四层融合原型</p>
+  <div class="pill-row">
+    <span class="pill pill-pqc">PQC · Dilithium2</span>
+    <span class="pill pill-zkp">ZKP · SIS-Σ-NIZK</span>
+    <span class="pill pill-pls">PLS · CSI 指纹</span>
+    <span class="pill pill-frame">IoVAuthFrame</span>
+  </div>
+  <p style="font-size:0.9rem">数据：configs/balanced · 30 轮 · <code>python scripts/run_all.py balanced</code></p>
+</header>
+
+<nav>
+  <a href="#background">背景</a>
+  <a href="#literature">文献</a>
+  <a href="#innovation">创新</a>
+  <a href="#principle">原理</a>
+  <a href="#architecture">架构</a>
+  <a href="#results">实验</a>
+  <a href="#reproduce">复现</a>
+  <a href="traffic_simulator.html" style="color:#67e8f9">真算传输演示 ↗</a>
+</nav>
+
+<main>
+
+<section id="background">
+  <h2>一、研究背景</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>产业需求</h3>
+      <p>V2X 协同感知与安全预警依赖可信身份。OBU 与 RSU 在开放无线环境中交换敏感数据，认证失败将导致伪造、追踪与恶意接入。</p>
+    </div>
+    <div class="card">
+      <h3>三类结构性缺口</h3>
+      <ul>
+        <li><strong style="color:#f87171">量子威胁</strong> — ECC 长期证书可被未来量子计算破解</li>
+        <li><strong style="color:#fbbf24">隐私不足</strong> — XOR/假名仍可能关联轨迹</li>
+        <li><strong style="color:#f87171">盗证异地用</strong> — 纯密码学无法证明「车在现场」</li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid-4" style="margin-top:1.25rem">
+    <div class="stat"><div class="num" style="color:var(--ok)">0%</div><div class="label">五类攻击成功率</div></div>
+    <div class="stat"><div class="num">4.9 ms</div><div class="label">RSU 验证延迟</div></div>
+    <div class="stat"><div class="num">27 ms</div><div class="label">端到端延迟</div></div>
+    <div class="stat"><div class="num">95</div><div class="label">SecurityRubric 分</div></div>
+  </div>
+</section>
+
+<section id="literature">
+  <h2>二、文献基础与方案对比</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>方案</th><th>抗量子</th><th>隐私/ZKP</th><th>物理层</th><th>会话绑定</th><th>主要短板</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Yang 2023 (ECC+XOR)</td><td>✗</td><td>弱</td><td>✗</td><td>✗</td><td>量子风险、XOR 泄露</td></tr>
+        <tr><td>ECDH+AES 改进</td><td>✗</td><td>中</td><td>✗</td><td>△</td><td>非抗量子、无 PLS</td></tr>
+        <tr><td>PQ-TDAA 2026</td><td>✓</td><td>✓</td><td>✗</td><td>△</td><td>无物理层第二因子</td></tr>
+        <tr><td><strong>本方案 ZKP-PQC-PLS</strong></td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td><td>通信/延迟开销较高</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:0.75rem;font-size:0.85rem">基线已复现为真实密码学实现：<code>src/baselines/yang2023.py</code>、<code>ecdh_aes_pseudonym.py</code></p>
+</section>
+
+<section id="innovation">
+  <h2>三、本项目创新</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>架构创新</h3>
+      <p>首次在可复现 IoV 原型中将 <strong>PQC + 格 ZKP + PLS + 会话帧</strong> 四层串联，RSU 短路验证 ZKP→PLS→PQC。</p>
+    </div>
+    <div class="card">
+      <h3>算法创新</h3>
+      <p><strong>SIS-Σ-NIZK</strong> 与 Dilithium 同族，证明 A·s≡t (mod q)；相对 Sigma 骨架，伪造 response 通过率从 100% 降至 0%。</p>
+    </div>
+    <div class="card">
+      <h3>实验创新</h3>
+      <p>七组可复现实验 + 盗证消融（主实验 PLS 开启 0% / 对照 counterfactual 100%）+ V2X 校准 CSI 双模式验证。</p>
+    </div>
+    <div class="card">
+      <h3>工程优化</h3>
+      <p>会话帧摘要签名、CSI float32 压缩、Replay Guard、基线密码学复现（非 sleep 占位）。</p>
+    </div>
+  </div>
+</section>
+
+<section id="principle">
+  <h2>四、理论基础</h2>
+  <div class="layer-stack">
+    <div class="layer layer-pqc">
+      <strong>PQC</strong>
+      <div>CRYSTALS-Dilithium / ML-DSA（FIPS 204）· 格上 SIS 困难问题 · 抗量子签名与完整性</div>
+    </div>
+    <div class="layer layer-zkp">
+      <strong>ZKP</strong>
+      <div>SIS-Σ-NIZK · Lyubashevsky 拒绝采样 + Fiat-Shamir · 最小披露「持有合法密钥」</div>
+    </div>
+    <div class="layer layer-pls">
+      <strong>PLS</strong>
+      <div>CSI 信道指纹 · 皮尔逊 ρ + 归一化距离双判据 · 异地盗证 ρ 显著降低</div>
+    </div>
+    <div class="layer layer-frame">
+      <strong>会话</strong>
+      <div>IoVAuthFrame · RSU ID + 时间戳 + nonce · Replay Guard 5s 窗口去重</div>
+    </div>
+  </div>
+</section>
+
+<section id="architecture">
+  <h2>五、系统架构</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>OBU → RSU 认证流程</h3>
+      <div class="flow">
+        <div class="flow-box obu">IoVAuthFrame.fresh(rsu_id)<div class="flow-step">会话帧：时间窗 + nonce</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box obu">PLS 提取 CSI<div class="flow-step">reported_csi 绑定 message</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box obu">ZKP 证明 + PQC 签名<div class="flow-step">SIS-NIZK + Dilithium2</div></div>
+        <div class="flow-arrow">⇅ 无线信道</div>
+        <div class="flow-box rsu">① Replay Guard<div class="flow-step">消息指纹去重</div></div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box rsu">② ZKP 验证 → ③ PLS 比对 → ④ PQC 验签<div class="flow-step">失败短路退出</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>代码模块</h3>
+      <table>
+        <tr><td><code>src/protocol/</code></td><td>FusionAuthProtocol, IoVAuthFrame</td></tr>
+        <tr><td><code>src/pqc/</code></td><td>Dilithium2 格签名</td></tr>
+        <tr><td><code>src/zkp/</code></td><td>sis_lattice_nizk.py</td></tr>
+        <tr><td><code>src/pls/</code></td><td>CSI 指纹 + V2X 数据</td></tr>
+        <tr><td><code>src/baselines/</code></td><td>Yang / ECDH 复现</td></tr>
+        <tr><td><code>scripts/run_all.py</code></td><td>七组实验 CSV</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <h2>六、实验结果</h2>
+
+  <h3>6.1 主性能对比（Group1）</h3>
+  <div class="card">
+    <div class="chart-wrap"><canvas id="chartLatency"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="chart-wrap"><canvas id="chartComm"></canvas></div>
+  </div>
+
+  <h3>6.2 攻击仿真（Group3）— 攻击者成功率均为 0%</h3>
+  <div class="card">
+    <div class="chart-wrap tall"><canvas id="chartAttacks"></canvas></div>
+  </div>
+
+  <h3>6.3 盗证消融 &amp; CSI 模式</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div class="chart-wrap"><canvas id="chartTheft"></canvas></div>
+      <p style="font-size:0.8rem;margin-top:0.5rem">对照组 100% 为事先标注的 counterfactual（关闭 PLS），非系统被攻破。</p>
+    </div>
+    <div class="card">
+      <div class="chart-wrap"><canvas id="chartCsi"></canvas></div>
+    </div>
+  </div>
+
+  <h3>6.4 ZKP 算法对照（Group7）</h3>
+  <div class="card">
+    <div class="chart-wrap"><canvas id="chartZkp"></canvas></div>
+  </div>
+</section>
+
+<section id="reproduce">
+  <h2>七、复现与录屏说明</h2>
+  <div class="card">
+    <pre style="color:#7dd3fc;font-size:0.9rem;overflow-x:auto"><code>cd iov_zkp_pqc_pls
+pip install -r requirements.txt
+python run_protocol.py
+python scripts/run_all.py balanced
+python -m http.server 8080  # 在 docs/demo 目录</code></pre>
+    <p style="margin-top:1rem">完整项目文档：<code>docs/PROJECT.md</code></p>
+    <p>录屏建议：全屏本页 → 按导航逐节滚动 → 图表区停留 3–5 秒便于观众阅读。</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  ZKP-PQC-PLS IoV Security Authentication · Research Prototype · 数据来自 results/*.csv (balanced)
+</footer>
+
+<script>
+const chartDefaults = {
+  color: '#8b9bb8',
+  borderColor: '#243049',
+};
+Chart.defaults.color = chartDefaults.color;
+Chart.defaults.borderColor = chartDefaults.borderColor;
+
+// Group1 data
+new Chart(document.getElementById('chartLatency'), {
+  type: 'bar',
+  data: {
+    labels: ['Yang 2023', 'ECDH+AES', '本方案 (RSU)', '本方案 (E2E)'],
+    datasets: [{
+      label: '延迟 (ms)',
+      data: [0.073, 0.085, 4.898, 27.435],
+      backgroundColor: ['#64748b', '#94a3b8', '#3b82f6', '#8b5cf6'],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { title: { display: true, text: '认证延迟对比', color: '#e8edf7', font: { size: 16 } },
+      legend: { display: false } },
+    scales: { y: { beginAtZero: true, title: { display: true, text: 'ms' } } }
+  }
+});
+
+new Chart(document.getElementById('chartComm'), {
+  type: 'bar',
+  data: {
+    labels: ['Yang', 'ECDH+AES', '本方案'],
+    datasets: [{
+      label: '通信量 (B)',
+      data: [227, 117, 4158],
+      backgroundColor: ['#64748b', '#94a3b8', '#10b981'],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { title: { display: true, text: '通信开销对比', color: '#e8edf7', font: { size: 16 } },
+      legend: { display: false } },
+    scales: { y: { beginAtZero: true, title: { display: true, text: 'Bytes' } } }
+  }
+});
+
+// Group3
+new Chart(document.getElementById('chartAttacks'), {
+  type: 'bar',
+  data: {
+    labels: ['重放', '盗证+异地', '远程中继', '消息篡改', 'ZKP-CSI解耦'],
+    datasets: [{
+      label: '攻击者成功率 (%)',
+      data: [0, 0, 0, 0, 0],
+      backgroundColor: '#22c55e',
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { title: { display: true, text: '威胁模型攻击仿真 (Group3)', color: '#e8edf7', font: { size: 16 } },
+      legend: { display: false } },
+    scales: { x: { max: 100, title: { display: true, text: '攻击成功率 %' } } }
+  }
+});
+
+// Theft ablation
+new Chart(document.getElementById('chartTheft'), {
+  type: 'bar',
+  data: {
+    labels: ['主实验 (PLS开启)', '对照 (PLS关闭)'],
+    datasets: [{
+      label: '盗证通过率 (%)',
+      data: [0, 100],
+      backgroundColor: ['#22c55e', '#f59e0b'],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { title: { display: true, text: '盗证消融', color: '#e8edf7', font: { size: 15 } },
+      legend: { display: false } },
+    scales: { y: { max: 100, title: { display: true, text: '%' } } }
+  }
+});
+
+// Group6 CSI
+new Chart(document.getElementById('chartCsi'), {
+  type: 'bar',
+  data: {
+    labels: ['仿真 Rayleigh', 'V2X 文献校准'],
+    datasets: [
+      { label: '良性认证率 (%)', data: [96.7, 100], backgroundColor: '#3b82f6', borderRadius: 4 },
+      { label: '盗证成功率 (%)', data: [0, 0], backgroundColor: '#22c55e', borderRadius: 4 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { title: { display: true, text: 'PLS 双模式 (Group6)', color: '#e8edf7', font: { size: 15 } } },
+    scales: { y: { max: 100 } }
+  }
+});
+
+// Group7 ZKP
+new Chart(document.getElementById('chartZkp'), {
+  type: 'bar',
+  data: {
+    labels: ['HMAC-Sigma', 'SIS-Σ-NIZK'],
+    datasets: [{
+      label: '伪造 response 通过率 (%)',
+      data: [100, 0],
+      backgroundColor: ['#ef4444', '#22c55e'],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { title: { display: true, text: 'ZKP 算法层对照 (Group7)', color: '#e8edf7', font: { size: 16 } },
+      legend: { display: false } },
+    scales: { y: { max: 100, title: { display: true, text: '%' } } }
+  }
+});
+</script>
+</body>
+</html>

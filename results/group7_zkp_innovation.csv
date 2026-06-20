@@ -1,0 +1,3 @@
+﻿algorithm_family,benign_auth_rate,experiment,forged_response_zkp_pass_rate,rounds,zkp_mode
+HMAC-Sigma,0.9333333333333333,zkp_algorithm_innovation,1.0,30,sigma
+SIS-Lyubashevsky-NIZK,0.9333333333333333,zkp_algorithm_innovation,0.0,30,sis_lattice_nizk

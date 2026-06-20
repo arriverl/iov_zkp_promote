@@ -3,7 +3,7 @@
 零知识证明 (ZKP)：证明「拥有与公钥对应的私钥」而不泄露私钥。
 采用 Sigma 协议（Schnorr 型）+ Fiat–Shamir 启发式得到非交互式证明，满足完备性、合理性、零知识性。
 与 zk-SNARK 在概念上一致（证明某关系成立而不泄露证人）；此处为 Sigma + Fiat–Shamir 非交互骨架。
-进阶可对接电路与 zk-SNARK（见 docs/LITERATURE_AND_INNOVATION.md 中 V2X 文献路线）。
+进阶可对接电路与 zk-SNARK（见 docs/PROJECT.md 文献综述）。
 """
 from __future__ import annotations
 

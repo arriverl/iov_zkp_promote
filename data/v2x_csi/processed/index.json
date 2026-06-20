@@ -1,0 +1,1325 @@
+{
+  "source": "literature_calibrated_v2x",
+  "reference": "IEEE DataPort 10.21227/3mkx-aq02 (V2X bidirectional CSI) / 3GPP TR 37.885 Jakes",
+  "csi_dim": 32,
+  "speeds_kmh": [
+    0,
+    5,
+    10,
+    20,
+    30,
+    40
+  ],
+  "legitimate_pairs": [
+    {
+      "id": "v2x_0kmh_000",
+      "obu": "v2x_0kmh_000_obu.npy",
+      "rsu": "v2x_0kmh_000_rsu.npy",
+      "speed_kmh": 0
+    },
+    {
+      "id": "v2x_0kmh_001",
+      "obu": "v2x_0kmh_001_obu.npy",
+      "rsu": "v2x_0kmh_001_rsu.npy",
+      "speed_kmh": 0
+    },
+    {
+      "id": "v2x_0kmh_002",
+      "obu": "v2x_0kmh_002_obu.npy",
+      "rsu": "v2x_0kmh_002_rsu.npy",
+      "speed_kmh": 0
+    },
+    {
+      "id": "v2x_0kmh_003",
+      "obu": "v2x_0kmh_003_obu.npy",
+      "rsu": "v2x_0kmh_003_rsu.npy",
+      "speed_kmh": 0
+    },
+    {
+      "id": "v2x_0kmh_004",
+      "obu": "v2x_0kmh_004_obu.npy",
+      "rsu": "v2x_0kmh_004_rsu.npy",
+      "speed_kmh": 0
+    },
+    {
+      "id": "v2x_0kmh_005",
+      "obu": "v2x_0kmh_005_obu.npy",
+      "rsu": "v2x_0kmh_005_rsu.npy",
+      "speed_kmh": 0
+    },
+    {
+      "id": "v2x_0kmh_006",
+      "obu": "v2x_0kmh_006_obu.npy",
+      "rsu": "v2x_0kmh_006_rsu.npy",
+      "speed_kmh": 0
+    },
+    {
+      "id": "v2x_5kmh_000",
+      "obu": "v2x_5kmh_000_obu.npy",
+      "rsu": "v2x_5kmh_000_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_001",
+      "obu": "v2x_5kmh_001_obu.npy",
+      "rsu": "v2x_5kmh_001_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_002",
+      "obu": "v2x_5kmh_002_obu.npy",
+      "rsu": "v2x_5kmh_002_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_003",
+      "obu": "v2x_5kmh_003_obu.npy",
+      "rsu": "v2x_5kmh_003_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_004",
+      "obu": "v2x_5kmh_004_obu.npy",
+      "rsu": "v2x_5kmh_004_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_005",
+      "obu": "v2x_5kmh_005_obu.npy",
+      "rsu": "v2x_5kmh_005_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_006",
+      "obu": "v2x_5kmh_006_obu.npy",
+      "rsu": "v2x_5kmh_006_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_007",
+      "obu": "v2x_5kmh_007_obu.npy",
+      "rsu": "v2x_5kmh_007_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_008",
+      "obu": "v2x_5kmh_008_obu.npy",
+      "rsu": "v2x_5kmh_008_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_009",
+      "obu": "v2x_5kmh_009_obu.npy",
+      "rsu": "v2x_5kmh_009_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_010",
+      "obu": "v2x_5kmh_010_obu.npy",
+      "rsu": "v2x_5kmh_010_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_011",
+      "obu": "v2x_5kmh_011_obu.npy",
+      "rsu": "v2x_5kmh_011_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_012",
+      "obu": "v2x_5kmh_012_obu.npy",
+      "rsu": "v2x_5kmh_012_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_013",
+      "obu": "v2x_5kmh_013_obu.npy",
+      "rsu": "v2x_5kmh_013_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_014",
+      "obu": "v2x_5kmh_014_obu.npy",
+      "rsu": "v2x_5kmh_014_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_015",
+      "obu": "v2x_5kmh_015_obu.npy",
+      "rsu": "v2x_5kmh_015_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_016",
+      "obu": "v2x_5kmh_016_obu.npy",
+      "rsu": "v2x_5kmh_016_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_017",
+      "obu": "v2x_5kmh_017_obu.npy",
+      "rsu": "v2x_5kmh_017_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_018",
+      "obu": "v2x_5kmh_018_obu.npy",
+      "rsu": "v2x_5kmh_018_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_019",
+      "obu": "v2x_5kmh_019_obu.npy",
+      "rsu": "v2x_5kmh_019_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_020",
+      "obu": "v2x_5kmh_020_obu.npy",
+      "rsu": "v2x_5kmh_020_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_021",
+      "obu": "v2x_5kmh_021_obu.npy",
+      "rsu": "v2x_5kmh_021_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_022",
+      "obu": "v2x_5kmh_022_obu.npy",
+      "rsu": "v2x_5kmh_022_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_023",
+      "obu": "v2x_5kmh_023_obu.npy",
+      "rsu": "v2x_5kmh_023_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_024",
+      "obu": "v2x_5kmh_024_obu.npy",
+      "rsu": "v2x_5kmh_024_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_025",
+      "obu": "v2x_5kmh_025_obu.npy",
+      "rsu": "v2x_5kmh_025_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_026",
+      "obu": "v2x_5kmh_026_obu.npy",
+      "rsu": "v2x_5kmh_026_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_027",
+      "obu": "v2x_5kmh_027_obu.npy",
+      "rsu": "v2x_5kmh_027_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_028",
+      "obu": "v2x_5kmh_028_obu.npy",
+      "rsu": "v2x_5kmh_028_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_029",
+      "obu": "v2x_5kmh_029_obu.npy",
+      "rsu": "v2x_5kmh_029_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_030",
+      "obu": "v2x_5kmh_030_obu.npy",
+      "rsu": "v2x_5kmh_030_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_031",
+      "obu": "v2x_5kmh_031_obu.npy",
+      "rsu": "v2x_5kmh_031_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_032",
+      "obu": "v2x_5kmh_032_obu.npy",
+      "rsu": "v2x_5kmh_032_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_033",
+      "obu": "v2x_5kmh_033_obu.npy",
+      "rsu": "v2x_5kmh_033_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_034",
+      "obu": "v2x_5kmh_034_obu.npy",
+      "rsu": "v2x_5kmh_034_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_035",
+      "obu": "v2x_5kmh_035_obu.npy",
+      "rsu": "v2x_5kmh_035_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_036",
+      "obu": "v2x_5kmh_036_obu.npy",
+      "rsu": "v2x_5kmh_036_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_037",
+      "obu": "v2x_5kmh_037_obu.npy",
+      "rsu": "v2x_5kmh_037_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_038",
+      "obu": "v2x_5kmh_038_obu.npy",
+      "rsu": "v2x_5kmh_038_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_039",
+      "obu": "v2x_5kmh_039_obu.npy",
+      "rsu": "v2x_5kmh_039_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_040",
+      "obu": "v2x_5kmh_040_obu.npy",
+      "rsu": "v2x_5kmh_040_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_041",
+      "obu": "v2x_5kmh_041_obu.npy",
+      "rsu": "v2x_5kmh_041_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_042",
+      "obu": "v2x_5kmh_042_obu.npy",
+      "rsu": "v2x_5kmh_042_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_043",
+      "obu": "v2x_5kmh_043_obu.npy",
+      "rsu": "v2x_5kmh_043_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_5kmh_044",
+      "obu": "v2x_5kmh_044_obu.npy",
+      "rsu": "v2x_5kmh_044_rsu.npy",
+      "speed_kmh": 5
+    },
+    {
+      "id": "v2x_10kmh_000",
+      "obu": "v2x_10kmh_000_obu.npy",
+      "rsu": "v2x_10kmh_000_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_001",
+      "obu": "v2x_10kmh_001_obu.npy",
+      "rsu": "v2x_10kmh_001_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_002",
+      "obu": "v2x_10kmh_002_obu.npy",
+      "rsu": "v2x_10kmh_002_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_003",
+      "obu": "v2x_10kmh_003_obu.npy",
+      "rsu": "v2x_10kmh_003_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_004",
+      "obu": "v2x_10kmh_004_obu.npy",
+      "rsu": "v2x_10kmh_004_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_005",
+      "obu": "v2x_10kmh_005_obu.npy",
+      "rsu": "v2x_10kmh_005_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_006",
+      "obu": "v2x_10kmh_006_obu.npy",
+      "rsu": "v2x_10kmh_006_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_007",
+      "obu": "v2x_10kmh_007_obu.npy",
+      "rsu": "v2x_10kmh_007_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_008",
+      "obu": "v2x_10kmh_008_obu.npy",
+      "rsu": "v2x_10kmh_008_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_009",
+      "obu": "v2x_10kmh_009_obu.npy",
+      "rsu": "v2x_10kmh_009_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_010",
+      "obu": "v2x_10kmh_010_obu.npy",
+      "rsu": "v2x_10kmh_010_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_011",
+      "obu": "v2x_10kmh_011_obu.npy",
+      "rsu": "v2x_10kmh_011_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_012",
+      "obu": "v2x_10kmh_012_obu.npy",
+      "rsu": "v2x_10kmh_012_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_013",
+      "obu": "v2x_10kmh_013_obu.npy",
+      "rsu": "v2x_10kmh_013_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_10kmh_014",
+      "obu": "v2x_10kmh_014_obu.npy",
+      "rsu": "v2x_10kmh_014_rsu.npy",
+      "speed_kmh": 10
+    },
+    {
+      "id": "v2x_20kmh_000",
+      "obu": "v2x_20kmh_000_obu.npy",
+      "rsu": "v2x_20kmh_000_rsu.npy",
+      "speed_kmh": 20
+    },
+    {
+      "id": "v2x_20kmh_001",
+      "obu": "v2x_20kmh_001_obu.npy",
+      "rsu": "v2x_20kmh_001_rsu.npy",
+      "speed_kmh": 20
+    },
+    {
+      "id": "v2x_20kmh_002",
+      "obu": "v2x_20kmh_002_obu.npy",
+      "rsu": "v2x_20kmh_002_rsu.npy",
+      "speed_kmh": 20
+    },
+    {
+      "id": "v2x_20kmh_003",
+      "obu": "v2x_20kmh_003_obu.npy",
+      "rsu": "v2x_20kmh_003_rsu.npy",
+      "speed_kmh": 20
+    },
+    {
+      "id": "v2x_20kmh_004",
+      "obu": "v2x_20kmh_004_obu.npy",
+      "rsu": "v2x_20kmh_004_rsu.npy",
+      "speed_kmh": 20
+    },
+    {
+      "id": "v2x_20kmh_005",
+      "obu": "v2x_20kmh_005_obu.npy",
+      "rsu": "v2x_20kmh_005_rsu.npy",
+      "speed_kmh": 20
+    },
+    {
+      "id": "v2x_20kmh_006",
+      "obu": "v2x_20kmh_006_obu.npy",
+      "rsu": "v2x_20kmh_006_rsu.npy",
+      "speed_kmh": 20
+    },
+    {
+      "id": "v2x_20kmh_007",
+      "obu": "v2x_20kmh_007_obu.npy",
+      "rsu": "v2x_20kmh_007_rsu.npy",
+      "speed_kmh": 20
+    },
+    {
+      "id": "v2x_20kmh_008",
+      "obu": "v2x_20kmh_008_obu.npy",
+      "rsu": "v2x_20kmh_008_rsu.npy",
+      "speed_kmh": 20
+    },
+    {
+      "id": "v2x_30kmh_000",
+      "obu": "v2x_30kmh_000_obu.npy",
+      "rsu": "v2x_30kmh_000_rsu.npy",
+      "speed_kmh": 30
+    },
+    {
+      "id": "v2x_30kmh_001",
+      "obu": "v2x_30kmh_001_obu.npy",
+      "rsu": "v2x_30kmh_001_rsu.npy",
+      "speed_kmh": 30
+    },
+    {
+      "id": "v2x_30kmh_002",
+      "obu": "v2x_30kmh_002_obu.npy",
+      "rsu": "v2x_30kmh_002_rsu.npy",
+      "speed_kmh": 30
+    },
+    {
+      "id": "v2x_30kmh_003",
+      "obu": "v2x_30kmh_003_obu.npy",
+      "rsu": "v2x_30kmh_003_rsu.npy",
+      "speed_kmh": 30
+    },
+    {
+      "id": "v2x_30kmh_004",
+      "obu": "v2x_30kmh_004_obu.npy",
+      "rsu": "v2x_30kmh_004_rsu.npy",
+      "speed_kmh": 30
+    },
+    {
+      "id": "v2x_40kmh_000",
+      "obu": "v2x_40kmh_000_obu.npy",
+      "rsu": "v2x_40kmh_000_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_001",
+      "obu": "v2x_40kmh_001_obu.npy",
+      "rsu": "v2x_40kmh_001_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_002",
+      "obu": "v2x_40kmh_002_obu.npy",
+      "rsu": "v2x_40kmh_002_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_003",
+      "obu": "v2x_40kmh_003_obu.npy",
+      "rsu": "v2x_40kmh_003_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_004",
+      "obu": "v2x_40kmh_004_obu.npy",
+      "rsu": "v2x_40kmh_004_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_005",
+      "obu": "v2x_40kmh_005_obu.npy",
+      "rsu": "v2x_40kmh_005_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_006",
+      "obu": "v2x_40kmh_006_obu.npy",
+      "rsu": "v2x_40kmh_006_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_007",
+      "obu": "v2x_40kmh_007_obu.npy",
+      "rsu": "v2x_40kmh_007_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_008",
+      "obu": "v2x_40kmh_008_obu.npy",
+      "rsu": "v2x_40kmh_008_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_009",
+      "obu": "v2x_40kmh_009_obu.npy",
+      "rsu": "v2x_40kmh_009_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_010",
+      "obu": "v2x_40kmh_010_obu.npy",
+      "rsu": "v2x_40kmh_010_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_011",
+      "obu": "v2x_40kmh_011_obu.npy",
+      "rsu": "v2x_40kmh_011_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_012",
+      "obu": "v2x_40kmh_012_obu.npy",
+      "rsu": "v2x_40kmh_012_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_013",
+      "obu": "v2x_40kmh_013_obu.npy",
+      "rsu": "v2x_40kmh_013_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_014",
+      "obu": "v2x_40kmh_014_obu.npy",
+      "rsu": "v2x_40kmh_014_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_015",
+      "obu": "v2x_40kmh_015_obu.npy",
+      "rsu": "v2x_40kmh_015_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_016",
+      "obu": "v2x_40kmh_016_obu.npy",
+      "rsu": "v2x_40kmh_016_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_017",
+      "obu": "v2x_40kmh_017_obu.npy",
+      "rsu": "v2x_40kmh_017_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_018",
+      "obu": "v2x_40kmh_018_obu.npy",
+      "rsu": "v2x_40kmh_018_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_019",
+      "obu": "v2x_40kmh_019_obu.npy",
+      "rsu": "v2x_40kmh_019_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_020",
+      "obu": "v2x_40kmh_020_obu.npy",
+      "rsu": "v2x_40kmh_020_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_021",
+      "obu": "v2x_40kmh_021_obu.npy",
+      "rsu": "v2x_40kmh_021_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_022",
+      "obu": "v2x_40kmh_022_obu.npy",
+      "rsu": "v2x_40kmh_022_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_023",
+      "obu": "v2x_40kmh_023_obu.npy",
+      "rsu": "v2x_40kmh_023_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_024",
+      "obu": "v2x_40kmh_024_obu.npy",
+      "rsu": "v2x_40kmh_024_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_025",
+      "obu": "v2x_40kmh_025_obu.npy",
+      "rsu": "v2x_40kmh_025_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_026",
+      "obu": "v2x_40kmh_026_obu.npy",
+      "rsu": "v2x_40kmh_026_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_027",
+      "obu": "v2x_40kmh_027_obu.npy",
+      "rsu": "v2x_40kmh_027_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_028",
+      "obu": "v2x_40kmh_028_obu.npy",
+      "rsu": "v2x_40kmh_028_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_029",
+      "obu": "v2x_40kmh_029_obu.npy",
+      "rsu": "v2x_40kmh_029_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_030",
+      "obu": "v2x_40kmh_030_obu.npy",
+      "rsu": "v2x_40kmh_030_rsu.npy",
+      "speed_kmh": 40
+    },
+    {
+      "id": "v2x_40kmh_031",
+      "obu": "v2x_40kmh_031_obu.npy",
+      "rsu": "v2x_40kmh_031_rsu.npy",
+      "speed_kmh": 40
+    }
+  ],
+  "theft_pairs": [
+    {
+      "id": "theft_0to5_0",
+      "obu": "v2x_0kmh_000_obu.npy",
+      "rsu_foreign": "theft_0to5_0_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_0to5_1",
+      "obu": "v2x_0kmh_001_obu.npy",
+      "rsu_foreign": "theft_0to5_1_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_0to5_2",
+      "obu": "v2x_0kmh_002_obu.npy",
+      "rsu_foreign": "theft_0to5_2_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_0to10_0",
+      "obu": "v2x_0kmh_000_obu.npy",
+      "rsu_foreign": "theft_0to10_0_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_0to10_1",
+      "obu": "v2x_0kmh_001_obu.npy",
+      "rsu_foreign": "theft_0to10_1_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_0to10_2",
+      "obu": "v2x_0kmh_002_obu.npy",
+      "rsu_foreign": "theft_0to10_2_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_0to20_0",
+      "obu": "v2x_0kmh_000_obu.npy",
+      "rsu_foreign": "theft_0to20_0_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_0to20_1",
+      "obu": "v2x_0kmh_001_obu.npy",
+      "rsu_foreign": "theft_0to20_1_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_0to20_2",
+      "obu": "v2x_0kmh_002_obu.npy",
+      "rsu_foreign": "theft_0to20_2_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_0to30_0",
+      "obu": "v2x_0kmh_000_obu.npy",
+      "rsu_foreign": "theft_0to30_0_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_0to30_1",
+      "obu": "v2x_0kmh_001_obu.npy",
+      "rsu_foreign": "theft_0to30_1_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_0to30_2",
+      "obu": "v2x_0kmh_002_obu.npy",
+      "rsu_foreign": "theft_0to30_2_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_0to40_0",
+      "obu": "v2x_0kmh_000_obu.npy",
+      "rsu_foreign": "theft_0to40_0_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_0to40_1",
+      "obu": "v2x_0kmh_001_obu.npy",
+      "rsu_foreign": "theft_0to40_1_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_0to40_2",
+      "obu": "v2x_0kmh_002_obu.npy",
+      "rsu_foreign": "theft_0to40_2_rsu_foreign.npy",
+      "speed_obu_kmh": 0,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_5to0_0",
+      "obu": "v2x_5kmh_000_obu.npy",
+      "rsu_foreign": "theft_5to0_0_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_5to0_1",
+      "obu": "v2x_5kmh_001_obu.npy",
+      "rsu_foreign": "theft_5to0_1_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_5to0_2",
+      "obu": "v2x_5kmh_002_obu.npy",
+      "rsu_foreign": "theft_5to0_2_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_5to10_0",
+      "obu": "v2x_5kmh_000_obu.npy",
+      "rsu_foreign": "theft_5to10_0_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_5to10_1",
+      "obu": "v2x_5kmh_001_obu.npy",
+      "rsu_foreign": "theft_5to10_1_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_5to10_2",
+      "obu": "v2x_5kmh_002_obu.npy",
+      "rsu_foreign": "theft_5to10_2_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_5to20_0",
+      "obu": "v2x_5kmh_000_obu.npy",
+      "rsu_foreign": "theft_5to20_0_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_5to20_1",
+      "obu": "v2x_5kmh_001_obu.npy",
+      "rsu_foreign": "theft_5to20_1_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_5to20_2",
+      "obu": "v2x_5kmh_002_obu.npy",
+      "rsu_foreign": "theft_5to20_2_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_5to30_0",
+      "obu": "v2x_5kmh_000_obu.npy",
+      "rsu_foreign": "theft_5to30_0_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_5to30_1",
+      "obu": "v2x_5kmh_001_obu.npy",
+      "rsu_foreign": "theft_5to30_1_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_5to30_2",
+      "obu": "v2x_5kmh_002_obu.npy",
+      "rsu_foreign": "theft_5to30_2_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_5to40_0",
+      "obu": "v2x_5kmh_000_obu.npy",
+      "rsu_foreign": "theft_5to40_0_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_5to40_1",
+      "obu": "v2x_5kmh_001_obu.npy",
+      "rsu_foreign": "theft_5to40_1_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_5to40_2",
+      "obu": "v2x_5kmh_002_obu.npy",
+      "rsu_foreign": "theft_5to40_2_rsu_foreign.npy",
+      "speed_obu_kmh": 5,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_10to0_0",
+      "obu": "v2x_10kmh_000_obu.npy",
+      "rsu_foreign": "theft_10to0_0_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_10to0_1",
+      "obu": "v2x_10kmh_001_obu.npy",
+      "rsu_foreign": "theft_10to0_1_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_10to0_2",
+      "obu": "v2x_10kmh_002_obu.npy",
+      "rsu_foreign": "theft_10to0_2_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_10to5_0",
+      "obu": "v2x_10kmh_000_obu.npy",
+      "rsu_foreign": "theft_10to5_0_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_10to5_1",
+      "obu": "v2x_10kmh_001_obu.npy",
+      "rsu_foreign": "theft_10to5_1_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_10to5_2",
+      "obu": "v2x_10kmh_002_obu.npy",
+      "rsu_foreign": "theft_10to5_2_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_10to20_0",
+      "obu": "v2x_10kmh_000_obu.npy",
+      "rsu_foreign": "theft_10to20_0_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_10to20_1",
+      "obu": "v2x_10kmh_001_obu.npy",
+      "rsu_foreign": "theft_10to20_1_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_10to20_2",
+      "obu": "v2x_10kmh_002_obu.npy",
+      "rsu_foreign": "theft_10to20_2_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_10to30_0",
+      "obu": "v2x_10kmh_000_obu.npy",
+      "rsu_foreign": "theft_10to30_0_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_10to30_1",
+      "obu": "v2x_10kmh_001_obu.npy",
+      "rsu_foreign": "theft_10to30_1_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_10to30_2",
+      "obu": "v2x_10kmh_002_obu.npy",
+      "rsu_foreign": "theft_10to30_2_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_10to40_0",
+      "obu": "v2x_10kmh_000_obu.npy",
+      "rsu_foreign": "theft_10to40_0_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_10to40_1",
+      "obu": "v2x_10kmh_001_obu.npy",
+      "rsu_foreign": "theft_10to40_1_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_10to40_2",
+      "obu": "v2x_10kmh_002_obu.npy",
+      "rsu_foreign": "theft_10to40_2_rsu_foreign.npy",
+      "speed_obu_kmh": 10,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_20to0_0",
+      "obu": "v2x_20kmh_000_obu.npy",
+      "rsu_foreign": "theft_20to0_0_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_20to0_1",
+      "obu": "v2x_20kmh_001_obu.npy",
+      "rsu_foreign": "theft_20to0_1_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_20to0_2",
+      "obu": "v2x_20kmh_002_obu.npy",
+      "rsu_foreign": "theft_20to0_2_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_20to5_0",
+      "obu": "v2x_20kmh_000_obu.npy",
+      "rsu_foreign": "theft_20to5_0_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_20to5_1",
+      "obu": "v2x_20kmh_001_obu.npy",
+      "rsu_foreign": "theft_20to5_1_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_20to5_2",
+      "obu": "v2x_20kmh_002_obu.npy",
+      "rsu_foreign": "theft_20to5_2_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_20to10_0",
+      "obu": "v2x_20kmh_000_obu.npy",
+      "rsu_foreign": "theft_20to10_0_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_20to10_1",
+      "obu": "v2x_20kmh_001_obu.npy",
+      "rsu_foreign": "theft_20to10_1_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_20to10_2",
+      "obu": "v2x_20kmh_002_obu.npy",
+      "rsu_foreign": "theft_20to10_2_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_20to30_0",
+      "obu": "v2x_20kmh_000_obu.npy",
+      "rsu_foreign": "theft_20to30_0_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_20to30_1",
+      "obu": "v2x_20kmh_001_obu.npy",
+      "rsu_foreign": "theft_20to30_1_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_20to30_2",
+      "obu": "v2x_20kmh_002_obu.npy",
+      "rsu_foreign": "theft_20to30_2_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_20to40_0",
+      "obu": "v2x_20kmh_000_obu.npy",
+      "rsu_foreign": "theft_20to40_0_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_20to40_1",
+      "obu": "v2x_20kmh_001_obu.npy",
+      "rsu_foreign": "theft_20to40_1_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_20to40_2",
+      "obu": "v2x_20kmh_002_obu.npy",
+      "rsu_foreign": "theft_20to40_2_rsu_foreign.npy",
+      "speed_obu_kmh": 20,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_30to0_0",
+      "obu": "v2x_30kmh_000_obu.npy",
+      "rsu_foreign": "theft_30to0_0_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_30to0_1",
+      "obu": "v2x_30kmh_001_obu.npy",
+      "rsu_foreign": "theft_30to0_1_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_30to0_2",
+      "obu": "v2x_30kmh_002_obu.npy",
+      "rsu_foreign": "theft_30to0_2_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_30to5_0",
+      "obu": "v2x_30kmh_000_obu.npy",
+      "rsu_foreign": "theft_30to5_0_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_30to5_1",
+      "obu": "v2x_30kmh_001_obu.npy",
+      "rsu_foreign": "theft_30to5_1_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_30to5_2",
+      "obu": "v2x_30kmh_002_obu.npy",
+      "rsu_foreign": "theft_30to5_2_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_30to10_0",
+      "obu": "v2x_30kmh_000_obu.npy",
+      "rsu_foreign": "theft_30to10_0_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_30to10_1",
+      "obu": "v2x_30kmh_001_obu.npy",
+      "rsu_foreign": "theft_30to10_1_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_30to10_2",
+      "obu": "v2x_30kmh_002_obu.npy",
+      "rsu_foreign": "theft_30to10_2_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_30to20_0",
+      "obu": "v2x_30kmh_000_obu.npy",
+      "rsu_foreign": "theft_30to20_0_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_30to20_1",
+      "obu": "v2x_30kmh_001_obu.npy",
+      "rsu_foreign": "theft_30to20_1_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_30to20_2",
+      "obu": "v2x_30kmh_002_obu.npy",
+      "rsu_foreign": "theft_30to20_2_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_30to40_0",
+      "obu": "v2x_30kmh_000_obu.npy",
+      "rsu_foreign": "theft_30to40_0_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_30to40_1",
+      "obu": "v2x_30kmh_001_obu.npy",
+      "rsu_foreign": "theft_30to40_1_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_30to40_2",
+      "obu": "v2x_30kmh_002_obu.npy",
+      "rsu_foreign": "theft_30to40_2_rsu_foreign.npy",
+      "speed_obu_kmh": 30,
+      "speed_rsu_kmh": 40
+    },
+    {
+      "id": "theft_40to0_0",
+      "obu": "v2x_40kmh_000_obu.npy",
+      "rsu_foreign": "theft_40to0_0_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_40to0_1",
+      "obu": "v2x_40kmh_001_obu.npy",
+      "rsu_foreign": "theft_40to0_1_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_40to0_2",
+      "obu": "v2x_40kmh_002_obu.npy",
+      "rsu_foreign": "theft_40to0_2_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 0
+    },
+    {
+      "id": "theft_40to5_0",
+      "obu": "v2x_40kmh_000_obu.npy",
+      "rsu_foreign": "theft_40to5_0_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_40to5_1",
+      "obu": "v2x_40kmh_001_obu.npy",
+      "rsu_foreign": "theft_40to5_1_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_40to5_2",
+      "obu": "v2x_40kmh_002_obu.npy",
+      "rsu_foreign": "theft_40to5_2_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 5
+    },
+    {
+      "id": "theft_40to10_0",
+      "obu": "v2x_40kmh_000_obu.npy",
+      "rsu_foreign": "theft_40to10_0_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_40to10_1",
+      "obu": "v2x_40kmh_001_obu.npy",
+      "rsu_foreign": "theft_40to10_1_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_40to10_2",
+      "obu": "v2x_40kmh_002_obu.npy",
+      "rsu_foreign": "theft_40to10_2_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 10
+    },
+    {
+      "id": "theft_40to20_0",
+      "obu": "v2x_40kmh_000_obu.npy",
+      "rsu_foreign": "theft_40to20_0_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_40to20_1",
+      "obu": "v2x_40kmh_001_obu.npy",
+      "rsu_foreign": "theft_40to20_1_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_40to20_2",
+      "obu": "v2x_40kmh_002_obu.npy",
+      "rsu_foreign": "theft_40to20_2_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 20
+    },
+    {
+      "id": "theft_40to30_0",
+      "obu": "v2x_40kmh_000_obu.npy",
+      "rsu_foreign": "theft_40to30_0_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_40to30_1",
+      "obu": "v2x_40kmh_001_obu.npy",
+      "rsu_foreign": "theft_40to30_1_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 30
+    },
+    {
+      "id": "theft_40to30_2",
+      "obu": "v2x_40kmh_002_obu.npy",
+      "rsu_foreign": "theft_40to30_2_rsu_foreign.npy",
+      "speed_obu_kmh": 40,
+      "speed_rsu_kmh": 30
+    }
+  ]
+}

@@ -23,6 +23,8 @@ from src.ablation import run_ablation_study
 from src.attacks import run_attack_suite
 from src.attacks.pls_ablation import run_pls_theft_ablation
 from src.config import protocol_from_config
+from src.evaluation.real_csi_eval import run_real_csi_comparison
+from src.evaluation.zkp_innovation_eval import run_zkp_innovation_comparison
 from src.protocol import FusionAuthProtocol, IoVAuthFrame
 
 
@@ -145,6 +147,19 @@ def run_all(config_profile: str = "balanced") -> None:
 
     print(f"[RUN] profile={config_profile}")
 
+    # 确保 V2X CSI 数据存在（real 模式对比实验依赖）
+    try:
+        import importlib.util
+        _prep = ROOT / "scripts" / "prepare_v2x_csi.py"
+        _spec = importlib.util.spec_from_file_location("prepare_v2x_csi", _prep)
+        _pmod = importlib.util.module_from_spec(_spec)
+        assert _spec.loader is not None
+        _spec.loader.exec_module(_pmod)
+        pls_dim = int(config.get("pls", {}).get("csi_dim", 32))
+        _pmod.prepare(csi_dim=pls_dim, force=False)
+    except Exception as e:
+        print(f"[WARN] V2X CSI 准备跳过: {e}")
+
     proto = protocol_from_config(config)
     rounds = int(config.get("rounds", 30))
 
@@ -174,17 +189,30 @@ def run_all(config_profile: str = "balanced") -> None:
     _write_csv(results_dir / "group5_scalability.csv", g5)
     print("[OK] group5_scalability.csv")
 
+    # PLS 盗证消融（供 PPT）
+    g_pls = run_pls_theft_ablation(rounds=rounds, protocol=protocol_from_config(config))
+    _write_csv(results_dir / "group_pls_theft_ablation.csv", g_pls)
+    print("[OK] group_pls_theft_ablation.csv")
+
+    # Group 6: 仿真 vs 真实/文献校准 V2X CSI
+    g6 = run_real_csi_comparison(profile=config_profile, rounds=rounds)
+    _write_csv(results_dir / "group6_real_csi_comparison.csv", g6)
+    print("[OK] group6_real_csi_comparison.csv")
+
+    # Group 7: ZKP 创新 Sigma vs PC-ZKP
+    g7 = run_zkp_innovation_comparison(profile=config_profile, rounds=rounds)
+    _write_csv(results_dir / "group7_zkp_innovation.csv", g7)
+    print("[OK] group7_zkp_innovation.csv")
+
     summary = [
         {"group": 1, "name": "main_comparison", "rows": len(g1)},
         {"group": 2, "name": "ablation", "rows": len(g2)},
         {"group": 3, "name": "attacks", "rows": len(g3)},
         {"group": 4, "name": "sensitivity", "rows": len(g4)},
         {"group": 5, "name": "scalability", "rows": len(g5)},
+        {"group": 6, "name": "real_csi_comparison", "rows": len(g6)},
+        {"group": 7, "name": "zkp_innovation", "rows": len(g7)},
     ]
-    # PLS 盗证消融（供 PPT）
-    g_pls = run_pls_theft_ablation(rounds=rounds, protocol=protocol_from_config(config))
-    _write_csv(results_dir / "group_pls_theft_ablation.csv", g_pls)
-    print("[OK] group_pls_theft_ablation.csv")
 
     try:
         import importlib.util
@@ -198,7 +226,7 @@ def run_all(config_profile: str = "balanced") -> None:
         print(f"[WARN] PPT 指标导出跳过: {e}")
 
     _write_csv(results_dir / "summary.csv", summary)
-    print("[DONE] 所有五组实验已导出到 results/")
+    print("[DONE] 所有实验已导出到 results/")
 
 
 if __name__ == "__main__":

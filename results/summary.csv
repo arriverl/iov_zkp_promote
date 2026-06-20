@@ -1,6 +1,8 @@
 ﻿group,name,rows
 1,main_comparison,3
 2,ablation,5
-3,attacks,4
+3,attacks,5
 4,sensitivity,12
 5,scalability,3
+6,real_csi_comparison,2
+7,zkp_innovation,2

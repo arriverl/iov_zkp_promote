@@ -1,5 +1,6 @@
 ﻿attack,notes,success_rate
 replay,1.0,0.0
 certificate_theft_impersonation,0.0,0.0
-remote_relay,0.4212458238005638,0.0
+remote_relay,0.4602666427691778,0.0
 message_tampering_mitm,0.0,0.0
+zkp_csi_decoupling,1.0,0.0

@@ -1,4 +1,4 @@
-﻿comm_bytes_csi,comm_bytes_pk,comm_bytes_sig,comm_bytes_total,comm_bytes_zkp,e2e_latency_ms_mean,e2e_latency_ms_median,latency_ms_mean,latency_ms_median,latency_ms_stdev,protocol,security_note
-,,,256,,,,0.5742800000158846,0.5551500000819942,,baseline_yang,"ECC, no PQC/ZKP/PLS"
-,,,512,,,,2.9496766667458965,3.0143500002850487,,improved_ecdh_aes,"ECDH+AES, no PQC, pseudonym"
-128,1312,2420,4014,80,68.56376000003668,55.55985000000874,10.968116666617789,10.939000000007582,2.660423478096788,innovation_zkp_pqc_pls,
+﻿comm_bytes_csi,comm_bytes_pk,comm_bytes_sig,comm_bytes_total,comm_bytes_zkp,e2e_latency_ms_mean,e2e_latency_ms_median,implementation,latency_ms_mean,latency_ms_median,latency_ms_stdev,protocol,reference,security_note
+,,,227,,0.18252333332308504,,yang2023_crypto_replica,0.07282666668212794,0.06905000003598616,,baseline_yang,"Yang et al. FGCS 145:415-428 (2023), DOI 10.1016/j.future.2023.04.004","ECC+XOR, no PQC/ZKP/PLS"
+,,,117,,0.17863333333707487,,ecdh_aes_gcm_replica,0.08530333332146256,0.08284999995566977,,improved_ecdh_aes,ECDH+AES-GCM pseudonym improvement over Yang XOR baseline,"ECDH+AES, no PQC, pseudonym"
+128,1312,2420,4158,224,27.434926666652853,22.673650000001544,,4.898206666678107,5.199000000004617,1.2621099482060005,innovation_zkp_pqc_pls,,

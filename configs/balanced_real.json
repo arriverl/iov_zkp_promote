@@ -1,0 +1,19 @@
+{
+  "profile": "balanced_real",
+  "rounds": 30,
+  "pqc_level": 2,
+  "zkp_challenge_bytes": 16,
+  "pqc_sign_digest": true,
+  "zkp_witness_digest": true,
+  "pls": {
+    "mode": "real",
+    "csi_dim": 32,
+    "threshold": 0.70,
+    "noise_std": 0.02,
+    "use_float32": true,
+    "num_multipath": 4,
+    "rel_dist_max": 1.25
+  },
+  "benchmark_rounds": 30,
+  "scalability_vehicle_counts": [50, 100, 200]
+}

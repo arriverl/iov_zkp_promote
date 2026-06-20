@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZKP-PQC-PLS 演示大屏</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #050810; --panel: #0f1629; --card: #141e36; --border: #1e2d4a;
+      --text: #f0f4fc; --muted: #8b9bb8;
+      --pqc: #8b5cf6; --zkp: #06b6d4; --pls: #10b981; --frame: #f59e0b;
+      --wire: #3b82f6; --ok: #22c55e; --fail: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", "PingFang SC", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .topbar {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border);
+      background: rgba(15,22,41,.95); position: sticky; top: 0; z-index: 100;
+    }
+    .topbar h1 { font-size: 1.15rem; }
+    .topbar .sub { font-size: 0.75rem; color: var(--muted); }
+    .badge { font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 4px; background: rgba(34,197,94,.2); color: #86efac; }
+    .tabs { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .tab {
+      padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 8px;
+      background: transparent; color: var(--muted); cursor: pointer; font-size: 0.85rem;
+    }
+    .tab.active { background: var(--wire); color: #fff; border-color: var(--wire); }
+    .view { display: none; padding: 1rem; max-width: 1500px; margin: 0 auto; }
+    .view.active { display: block; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; }
+    .card h2 { font-size: 0.95rem; color: #93c5fd; margin-bottom: 0.75rem; }
+
+    /* —— 动态流程 —— */
+    .flow-layout { display: grid; grid-template-columns: 1fr 80px 1fr; gap: 0.5rem; min-height: 420px; }
+    @media (max-width: 800px) { .flow-layout { grid-template-columns: 1fr; } }
+    .layer-pipeline { display: flex; flex-direction: column; gap: 0.5rem; }
+    .layer-box {
+      padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid var(--border);
+      background: #0a1020; transition: all 0.35s; position: relative; overflow: hidden;
+    }
+    .layer-box .title { font-weight: 700; font-size: 0.85rem; }
+    .layer-box .desc { font-size: 0.72rem; color: var(--muted); margin-top: 0.25rem; }
+    .layer-box .ms { font-size: 0.7rem; margin-top: 0.35rem; color: #67e8f9; }
+    .layer-box.idle { opacity: 0.55; }
+    .layer-box.active { transform: scale(1.02); box-shadow: 0 0 20px rgba(59,130,246,.3); }
+    .layer-box.done { border-color: var(--ok); }
+    .layer-box.fail { border-color: var(--fail); box-shadow: 0 0 16px rgba(239,68,68,.3); }
+    .layer-box.frame { border-left: 4px solid var(--frame); }
+    .layer-box.pls { border-left: 4px solid var(--pls); }
+    .layer-box.zkp { border-left: 4px solid var(--zkp); }
+    .layer-box.pqc { border-left: 4px solid var(--pqc); }
+    .layer-box.replay { border-left: 4px solid #94a3b8; }
+    .mid-arrow { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; }
+    .mid-arrow .arrow { font-size: 1.5rem; color: var(--muted); }
+    .particle {
+      width: 12px; height: 12px; border-radius: 50%; background: var(--wire);
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .layer-box.active .particle { opacity: 1; animation: pulse-p 0.8s infinite; }
+    @keyframes pulse-p { 50% { transform: translateY(-50%) scale(1.4); } }
+    .flow-log { font-family: Consolas, monospace; font-size: 0.72rem; max-height: 160px; overflow-y: auto; color: var(--muted); margin-top: 0.75rem; }
+    .flow-log div { margin-bottom: 0.2rem; }
+    .btn-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+    button {
+      padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border);
+      background: #1e293b; color: var(--text); cursor: pointer; font-size: 0.85rem;
+    }
+    button.primary { background: #2563eb; border-color: #3b82f6; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* —— 攻击实验室 —— */
+    .attack-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+    .attack-btn {
+      padding: 1.25rem 1rem; border-radius: 12px; border: 2px solid var(--border);
+      background: var(--panel); cursor: pointer; text-align: center; transition: .2s;
+    }
+    .attack-btn:hover { border-color: var(--wire); transform: translateY(-2px); }
+    .attack-btn .icon { font-size: 2rem; }
+    .attack-btn .label { font-weight: 700; margin-top: 0.5rem; font-size: 0.9rem; }
+    .attack-btn .hint { font-size: 0.72rem; color: var(--muted); margin-top: 0.35rem; }
+    .attack-btn.theft { border-color: rgba(239,68,68,.4); }
+    .attack-btn.replay { border-color: rgba(245,158,11,.4); }
+    .lab-stage {
+      display: grid; grid-template-columns: 1fr 60px 1fr; align-items: center; min-height: 180px;
+      background: #0a1020; border-radius: 12px; padding: 1rem; margin-top: 1rem;
+    }
+    .lab-node { text-align: center; }
+    .lab-node .big { font-size: 2.5rem; }
+    .shield {
+      text-align: center; padding: 1rem; border-radius: 10px; border: 2px dashed var(--border);
+      min-height: 100px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem; transition: .3s;
+    }
+    .shield.block { border-color: var(--ok); background: rgba(34,197,94,.1); color: #86efac; }
+    .shield.breach { border-color: var(--fail); background: rgba(239,68,68,.1); color: #fca5a5; }
+    .lab-log { font-family: Consolas, monospace; font-size: 0.75rem; max-height: 200px; overflow-y: auto; margin-top: 1rem; color: var(--muted); }
+
+    /* —— 数据大屏 —— */
+    .dash-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+    @media (max-width: 700px) { .dash-stats { grid-template-columns: repeat(2, 1fr); } }
+    .stat { text-align: center; padding: 1rem; background: var(--panel); border-radius: 10px; border: 1px solid var(--border); }
+    .stat .n { font-size: 1.6rem; font-weight: 700; }
+    .stat .l { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+    .chart-box { height: 280px; position: relative; }
+    .chart-box.sm { height: 220px; }
+    .hint-off { background: rgba(239,68,68,.1); border: 1px solid var(--fail); color: #fca5a5; padding: 0.75rem; border-radius: 8px; margin: 1rem; font-size: 0.85rem; display: none; }
+    .hint-off.show { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="hint-off" id="hintOff">请先运行 <code>python scripts/live_demo_server.py</code>，并访问 <code>http://127.0.0.1:8765/showcase.html</code></div>
+
+<header class="topbar">
+  <div>
+    <h1>ZKP-PQC-PLS 演示大屏 <span class="badge" id="liveBadge">LIVE</span></h1>
+    <div class="sub">真算 Dilithium2 + SIS-ZKP + PLS · 实验数据来自 results/*.csv</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-view="flow">① 动态流程仿真</button>
+    <button class="tab" data-view="lab">② 攻击实验室</button>
+    <button class="tab" data-view="dash">③ 数据可视化</button>
+  </div>
+</header>
+
+<!-- ========== 动态流程仿真 ========== -->
+<section class="view active" id="view-flow">
+  <div class="btn-row">
+    <button class="primary" id="btnFlowNormal">▶ 真算：正常认证全流程</button>
+    <label style="font-size:0.8rem;color:var(--muted)">动画倍速
+      <input type="range" id="speedFlow" min="0.3" max="3" step="0.1" value="1" style="width:70px;vertical-align:middle" />
+    </label>
+  </div>
+  <div class="flow-layout">
+    <div class="card">
+      <h2>OBU 构包 — 分层处理</h2>
+      <div class="layer-pipeline" id="obuLayers">
+        <div class="layer-box frame idle" data-id="obu-frame"><span class="title">会话帧 IoVAuthFrame</span><span class="desc">RSU_ID · 时间戳 · nonce · policy</span><span class="ms"></span><div class="particle"></div></div>
+        <div class="layer-box pls idle" data-id="obu-pls"><span class="title">PLS 层</span><span class="desc">extract_session_csi → reported_csi</span><span class="ms"></span><div class="particle"></div></div>
+        <div class="layer-box zkp idle" data-id="obu-zkp"><span class="title">ZKP 层</span><span class="desc">SIS-Σ-NIZK prove（A·s≡t）</span><span class="ms"></span><div class="particle"></div></div>
+        <div class="layer-box pqc idle" data-id="obu-pqc"><span class="title">PQC 层</span><span class="desc">Dilithium2 sign(pk, sig)</span><span class="ms"></span><div class="particle"></div></div>
+      </div>
+    </div>
+    <div class="mid-arrow">
+      <div class="arrow">⇒</div>
+      <div style="font-size:0.65rem;color:var(--muted);writing-mode:vertical-rl">V2I PDU</div>
+      <div class="arrow">⇒</div>
+    </div>
+    <div class="card">
+      <h2>RSU 验证 — 短路流水线</h2>
+      <div class="layer-pipeline" id="rsuLayers">
+        <div class="layer-box replay idle" data-id="rsu-replay"><span class="title">Replay Guard</span><span class="desc">message 指纹 5s 窗口</span><span class="ms"></span><div class="particle"></div></div>
+        <div class="layer-box zkp idle" data-id="rsu-zkp"><span class="title">ZKP 验证</span><span class="desc">SIS 关系 + 挑战绑定</span><span class="ms"></span><div class="particle"></div></div>
+        <div class="layer-box pls idle" data-id="rsu-pls"><span class="title">PLS 验证</span><span class="desc">ρ ≥ γ 且 rel_dist ≤ 阈值</span><span class="ms"></span><div class="particle"></div></div>
+        <div class="layer-box pqc idle" data-id="rsu-pqc"><span class="title">PQC 验签</span><span class="desc">Dilithium2 verify</span><span class="ms"></span><div class="particle"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:1rem">
+    <h2>真算日志</h2>
+    <div class="flow-log" id="flowLog"></div>
+  </div>
+</section>
+
+<!-- ========== 攻击实验室 ========== -->
+<section class="view" id="view-lab">
+  <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">点击下方按钮触发<strong>真实密码学运算</strong>，观察 RSU 如何拦截攻击（非假数据）。</p>
+  <div class="attack-grid">
+    <div class="attack-btn replay" data-scenario="replay">
+      <div class="icon">🔁</div>
+      <div class="label">模拟重放攻击</div>
+      <div class="hint">重复提交同一 AuthRequest → Replay Guard</div>
+    </div>
+    <div class="attack-btn theft" data-scenario="theft">
+      <div class="icon">🕵️</div>
+      <div class="label">模拟异地盗证</div>
+      <div class="hint">合法凭证 + 异地 CSI → PLS 拦截</div>
+    </div>
+    <div class="attack-btn" data-scenario="tamper">
+      <div class="icon">✂️</div>
+      <div class="label">模拟消息篡改</div>
+      <div class="hint">改 message 保留签名 → PQC 失败</div>
+    </div>
+    <div class="attack-btn" data-scenario="relay">
+      <div class="icon">📶</div>
+      <div class="label">模拟远程中继</div>
+      <div class="hint">CSI 强噪声 → PLS 失败</div>
+    </div>
+  </div>
+  <div class="lab-stage">
+    <div class="lab-node"><div class="big">🚗</div><div>攻击者 / OBU</div></div>
+    <div class="shield" id="labShield">等待攻击模拟…</div>
+    <div class="lab-node"><div class="big">📡</div><div>RSU 路侧</div></div>
+  </div>
+  <div class="card">
+    <h2>拦截过程（真算）</h2>
+    <div class="lab-log" id="labLog"></div>
+  </div>
+</section>
+
+<!-- ========== 数据可视化大屏 ========== -->
+<section class="view" id="view-dash">
+  <div class="dash-stats" id="dashStats"></div>
+  <div class="grid-2">
+    <div class="card"><h2>协议延迟对比 (Group1)</h2><div class="chart-box"><canvas id="cLatency"></canvas></div></div>
+    <div class="card"><h2>通信开销 (Bytes)</h2><div class="chart-box"><canvas id="cComm"></canvas></div></div>
+    <div class="card"><h2>攻击成功率 — 越低越安全 (Group3)</h2><div class="chart-box sm"><canvas id="cAttack"></canvas></div></div>
+    <div class="card"><h2>SecurityRubric 安全评分</h2><div class="chart-box sm"><canvas id="cRubric"></canvas></div></div>
+    <div class="card"><h2>本方案通信分解</h2><div class="chart-box sm"><canvas id="cBreakdown"></canvas></div></div>
+    <div class="card"><h2>盗证消融 / ZKP 对照</h2><div class="chart-box sm"><canvas id="cTheft"></canvas></div></div>
+  </div>
+</section>
+
+<script>
+const API = '';
+let charts = {};
+let busy = false;
+
+function $(id) { return document.getElementById(id); }
+function sleep(ms) {
+  const s = parseFloat($('speedFlow')?.value || 1);
+  return new Promise(r => setTimeout(r, Math.max(40, ms / s)));
+}
+
+// Tabs
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    $('view-' + t.dataset.view).classList.add('active');
+    if (t.dataset.view === 'dash') loadDashboard();
+  });
+});
+
+async function checkHealth() {
+  try {
+    const r = await fetch(API + '/api/health');
+    if (!r.ok) throw 0;
+    const j = await r.json();
+    $('liveBadge').textContent = 'LIVE · ' + j.profile;
+    $('hintOff').classList.remove('show');
+    return true;
+  } catch {
+    $('liveBadge').textContent = 'OFFLINE';
+    $('hintOff').classList.add('show');
+    return false;
+  }
+}
+
+function resetLayers(containerId) {
+  document.querySelectorAll(`#${containerId} .layer-box`).forEach(el => {
+    el.className = el.className.replace(/\b(active|done|fail)\b/g, '').trim() + ' idle';
+    el.querySelector('.ms').textContent = '';
+  });
+}
+
+function setLayer(id, state, msText = '') {
+  const el = document.querySelector(`[data-id="${id}"]`);
+  if (!el) return;
+  el.classList.remove('idle', 'active', 'done', 'fail');
+  el.classList.add(state);
+  if (msText) el.querySelector('.ms').textContent = msText;
+}
+
+function flowLog(msg) {
+  const d = document.createElement('div');
+  d.textContent = msg;
+  $('flowLog').appendChild(d);
+  $('flowLog').scrollTop = $('flowLog').scrollHeight;
+}
+
+function mapStepToLayer(step) {
+  const a = step.action || '';
+  if (step.phase === 'obu') {
+    if (a.includes('IoVAuthFrame')) return 'obu-frame';
+    if (a.includes('PLS') || a.includes('csi')) return 'obu-pls';
+    if (a.includes('ZKP')) return 'obu-zkp';
+    if (a.includes('Dilithium') || a.includes('组装')) return 'obu-pqc';
+  }
+  if (step.phase === 'rsu') {
+    const m = { replay: 'rsu-replay', zkp: 'rsu-zkp', pls: 'rsu-pls', pqc: 'rsu-pqc' };
+    return m[step.step] || null;
+  }
+  return null;
+}
+
+async function playSteps(data, logFn) {
+  resetLayers('obuLayers');
+  resetLayers('rsuLayers');
+  for (const step of data.steps) {
+    const lid = mapStepToLayer(step);
+    const ms = step.ms ? `${step.ms} ms` : '';
+    const extra = step.rho != null ? ` · ρ=${step.rho}` : '';
+    const line = `[${step.phase}] ${step.action}${ms ? ' ' + ms : ''}${extra}${step.ok === false ? ' FAIL' : step.ok === true ? ' OK' : ''}`;
+    logFn(line);
+
+    if (lid) {
+      setLayer(lid, 'active', ms + extra);
+      await sleep(Math.max(step.ms || 0, 100));
+      setLayer(lid, step.ok === false ? 'fail' : 'done', ms + extra);
+    } else if (step.phase === 'tx') {
+      await sleep(300);
+    }
+    if (step.ok === false && step.phase === 'rsu') break;
+  }
+}
+
+async function apiRound(scenario) {
+  const res = await fetch(API + '/api/round', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scenario }),
+  });
+  if (!res.ok) {
+    const e = await res.json();
+    throw new Error(e.error || res.statusText);
+  }
+  return res.json();
+}
+
+$('btnFlowNormal').addEventListener('click', async () => {
+  if (busy || !await checkHealth()) return;
+  busy = true;
+  $('btnFlowNormal').disabled = true;
+  $('flowLog').innerHTML = '';
+  try {
+    flowLog('真算 normal 场景启动…');
+    const data = await apiRound('normal');
+    await playSteps(data, flowLog);
+    flowLog(`结果: ${data.success ? 'SUCCESS' : 'FAIL'} · E2E ${data.e2e_ms} ms · ρ=${data.pls_rho}`);
+  } catch (e) {
+    flowLog('错误: ' + e.message);
+  }
+  busy = false;
+  $('btnFlowNormal').disabled = false;
+});
+
+document.querySelectorAll('.attack-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    if (busy || !await checkHealth()) return;
+    busy = true;
+    const scenario = btn.dataset.scenario;
+    const shield = $('labShield');
+    const log = $('labLog');
+    log.innerHTML = '';
+    shield.className = 'shield';
+    shield.textContent = '真算中…';
+    try {
+      const data = await apiRound(scenario);
+      for (const step of data.steps) {
+        const d = document.createElement('div');
+        d.textContent = `[${step.phase}] ${step.action}` + (step.ms ? ` ${step.ms}ms` : '') + (step.ok === false ? ' ✗' : step.ok === true ? ' ✓' : '');
+        log.appendChild(d);
+      }
+      if (data.success) {
+        shield.className = 'shield breach';
+        shield.textContent = '⚠ 攻击未拦截（对照场景）';
+      } else {
+        shield.className = 'shield block';
+        shield.textContent = '🛡 RSU 已拦截 — ' + data.details;
+      }
+    } catch (e) {
+      shield.className = 'shield breach';
+      shield.textContent = 'API 错误: ' + e.message;
+    }
+    busy = false;
+  });
+});
+
+let dashLoaded = false;
+async function loadDashboard() {
+  if (dashLoaded) return;
+  let m;
+  try {
+    const r = await fetch(API + '/api/metrics');
+    m = await r.json();
+  } catch {
+    $('dashStats').innerHTML = '<p style="color:#fca5a5">无法加载 metrics，请启动 live_demo_server</p>';
+    return;
+  }
+  dashLoaded = true;
+  const inn = m.main_comparison.protocols.find(p => p.key === 'innovation') || m.main_comparison.protocols[2];
+  $('dashStats').innerHTML = `
+    <div class="stat"><div class="n">${inn.rsu_ms.toFixed(1)}</div><div class="l">RSU 延迟 (ms)</div></div>
+    <div class="stat"><div class="n">${inn.comm_bytes}</div><div class="l">通信 (B)</div></div>
+    <div class="stat"><div class="n">${m.security_rubric.innovation}</div><div class="l">安全评分</div></div>
+    <div class="stat"><div class="n">0%</div><div class="l">攻击成功率</div></div>
+  `;
+
+  const protos = m.main_comparison.protocols;
+  const labels = protos.map(p => p.name);
+  Chart.defaults.color = '#8b9bb8';
+  Chart.defaults.borderColor = '#1e2d4a';
+
+  charts.lat = new Chart($('cLatency'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'RSU (ms)', data: protos.map(p => p.rsu_ms), backgroundColor: '#3b82f6' },
+        { label: 'E2E (ms)', data: protos.map(p => p.e2e_ms), backgroundColor: '#8b5cf6' },
+      ],
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } },
+  });
+
+  charts.comm = new Chart($('cComm'), {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Bytes', data: protos.map(p => p.comm_bytes), backgroundColor: ['#64748b','#94a3b8','#10b981'] }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } },
+  });
+
+  const atkNames = { replay: '重放', certificate_theft_impersonation: '盗证', remote_relay: '中继', message_tampering_mitm: '篡改', zkp_csi_decoupling: 'ZKP解耦' };
+  const atkLabels = Object.keys(m.attacks).map(k => atkNames[k] || k);
+  charts.atk = new Chart($('cAttack'), {
+    type: 'bar',
+    data: { labels: atkLabels, datasets: [{ label: '攻击成功率%', data: Object.values(m.attacks).map(a => a.success_rate * 100), backgroundColor: '#22c55e' }] },
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { max: 100 } } },
+  });
+
+  const rub = m.security_rubric;
+  charts.rubric = new Chart($('cRubric'), {
+    type: 'radar',
+    data: {
+      labels: ['Yang 基线', 'ECDH+AES', '本方案'],
+      datasets: [{ label: 'SecurityRubric', data: [rub.baseline, rub.improved, rub.innovation], backgroundColor: 'rgba(59,130,246,.2)', borderColor: '#3b82f6' }],
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 100 } } },
+  });
+
+  const bd = inn.comm_breakdown || {};
+  charts.bd = new Chart($('cBreakdown'), {
+    type: 'doughnut',
+    data: {
+      labels: ['PK', 'Sig', 'ZKP', 'CSI'],
+      datasets: [{ data: [bd.pk, bd.sig, bd.zkp, bd.csi], backgroundColor: ['#7c3aed','#8b5cf6','#06b6d4','#10b981'] }],
+    },
+    options: { responsive: true, maintainAspectRatio: false },
+  });
+
+  const ta = m.theft_ablation;
+  charts.theft = new Chart($('cTheft'), {
+    type: 'bar',
+    data: {
+      labels: ['盗证·PLS开', '盗证·PLS关(对照)', 'Sigma伪造', 'SIS伪造'],
+      datasets: [{
+        label: '通过率%',
+        data: [
+          ta.primary_pls_enabled * 100,
+          ta.control_pls_disabled * 100,
+          (m.zkp_innovation.find(z => z.family.includes('Sigma'))?.forged_pass_rate || 1) * 100,
+          (m.zkp_innovation.find(z => z.family.includes('SIS'))?.forged_pass_rate || 0) * 100,
+        ],
+        backgroundColor: ['#22c55e', '#f59e0b', '#ef4444', '#22c55e'],
+      }],
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { max: 100 } } },
+  });
+}
+
+checkHealth();
+</script>
+</body>
+</html>

@@ -7,12 +7,13 @@ from __future__ import annotations
 import hashlib
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional, Tuple
 
 _PQC_BIND_PREFIX = b"PQC-Bind|v1|"
 
 from ..pqc import PQCLatticeSigner
-from ..zkp import ZKPProver, ZKPVerifier, ZKProof
+from ..zkp import ZKProof, create_zkp_system, prove_request, verify_request
 from ..pls import PLSAuthenticator
 from .iov_auth_frame import IoVAuthFrame
 
@@ -46,18 +47,25 @@ class FusionAuthProtocol:
         pls_use_float32: bool = True,
         pls_num_multipath: int = 8,
         pls_rel_dist_max: float = 0.42,
+        pls_csi_mode: str = "simulation",
+        pls_csi_data_dir: Optional[str] = None,
         replay_window_ms: int = 5000,
         pqc_sign_digest: bool = True,
         zkp_witness_digest: bool = True,
+        zkp_mode: str = "sis_lattice_nizk",
         replay_cleanup_interval: int = 32,
     ):
         self.pqc_sign_digest = pqc_sign_digest
         self.zkp_witness_digest = zkp_witness_digest
+        self.zkp_mode = zkp_mode if zkp_mode in ("sigma", "sis_lattice_nizk", "pczkp") else "sis_lattice_nizk"
         self._replay_cleanup_interval = max(1, replay_cleanup_interval)
         self._replay_ops = 0
         self.pqc = PQCLatticeSigner(security_level=pqc_level)
-        self.zkp_prover = ZKPProver(challenge_bytes=zkp_challenge_bytes)
-        self.zkp_verifier = ZKPVerifier(challenge_bytes=zkp_challenge_bytes)
+        self.zkp_prover, self.zkp_verifier = create_zkp_system(
+            mode=self.zkp_mode,  # type: ignore[arg-type]
+            challenge_bytes=zkp_challenge_bytes,
+            epoch_window_ms=replay_window_ms,
+        )
         self.pls = PLSAuthenticator(
             threshold=pls_threshold,
             csi_dim=pls_csi_dim,
@@ -65,6 +73,8 @@ class FusionAuthProtocol:
             use_float32=pls_use_float32,
             num_multipath=pls_num_multipath,
             rel_dist_max=pls_rel_dist_max,
+            csi_mode="real" if pls_csi_mode == "real" else "simulation",
+            csi_data_dir=Path(pls_csi_data_dir) if pls_csi_data_dir else None,
         )
         self._pk: Optional[bytes] = None
         self._sk: Optional[bytes] = None
@@ -81,6 +91,12 @@ class FusionAuthProtocol:
         if self.zkp_witness_digest:
             return hashlib.sha256(sk).digest()
         return sk
+
+    def _zkp_prove_secret(self, sk: bytes) -> bytes:
+        """SIS-Σ-NIZK 需完整 sk 导出短向量；Sigma 模式可用 witness 摘要。"""
+        if self.zkp_mode == "sis_lattice_nizk":
+            return sk
+        return self._zkp_witness(sk)
 
     def _cleanup_replay_cache(self, now_ms: float) -> None:
         if not self._seen_message_ts:
@@ -138,20 +154,22 @@ class FusionAuthProtocol:
         pk, sk = self._pk, self._sk
         msg = self._resolve_message(message, frame)
         pqc_msg = self._pqc_payload(msg)
-        zkp_w = self._zkp_witness(sk)
+        zkp_w = self._zkp_prove_secret(sk)
 
-        # 1) ZKP：证明持有私钥（witness 默认用 sk 摘要，避免对大密钥重复哈希）
-        proof = self.zkp_prover.prove(
+        # 3) CSI 指纹（与会话 message 绑定，合法 RSU 可复现同链路特征）
+        csi = self.pls.extract_session_csi(msg)
+
+        # 1) ZKP：证明持有私钥；PC-ZKP 模式下将 CSI 摘要写入挑战绑定
+        proof = prove_request(
+            self.zkp_prover,
             witness=zkp_w,
             public_input=pk,
             message=msg,
+            reported_csi=csi,
         )
 
         # 2) PQC 签名（默认对会话帧摘要签名，验证复杂度与消息长度解耦）
         signature = self.pqc.sign(pqc_msg, sk)
-
-        # 3) CSI 指纹（与会话 message 绑定，合法 RSU 可复现同链路特征）
-        csi = self.pls.extract_session_csi(msg)
 
         return {
             "message": msg,
@@ -168,10 +186,14 @@ class FusionAuthProtocol:
         self,
         request: dict,
         measured_csi: Optional[bytes] = None,
+        *,
+        pls_enabled: bool = True,
     ) -> AuthResult:
         """
         RSU 侧：验证 ZKP、PQC 签名，并做 CSI 匹配。
         若未提供 measured_csi，则用 reported_csi 加噪声模拟 RSU 测量。
+        ``pls_enabled=False`` 仅用于对照实验（模拟无物理层第二因子的基线方案），
+        跳过 CSI 匹配但仍执行 ZKP 与 PQC 验证。
         """
         t0 = time.perf_counter()
         msg = request["message"]
@@ -190,14 +212,17 @@ class FusionAuthProtocol:
                 details="REJECTED: replay detected",
             )
 
-        zkp_ok = self.zkp_verifier.verify(
-            request["pk"],
+        reported_csi = request["reported_csi"]
+        zkp_ok = verify_request(
+            self.zkp_verifier,
+            pk,
             msg,
             ZKProof(
                 commitment=request["zkp_commitment"],
                 response=request["zkp_response"],
                 challenge_digest=request["zkp_challenge_digest"],
             ),
+            reported_csi,
         )
         if not zkp_ok:
             latency_ms = (time.perf_counter() - t0) * 1000
@@ -211,16 +236,18 @@ class FusionAuthProtocol:
                 details="ZKP=FAIL (early exit)",
             )
 
-        reported_csi = request["reported_csi"]
-        if measured_csi is not None:
-            import numpy as np
-            if isinstance(measured_csi, bytes):
-                measured = self.pls.unpack_csi(measured_csi)
-            else:
-                measured = np.asarray(measured_csi)
+        if not pls_enabled:
+            pls_ok, similarity = True, 1.0
         else:
-            measured = self.pls.add_channel_noise(reported_csi)
-        pls_ok, similarity = self.pls.authenticate(reported_csi, measured)
+            if measured_csi is not None:
+                import numpy as np
+                if isinstance(measured_csi, bytes):
+                    measured = self.pls.unpack_csi(measured_csi)
+                else:
+                    measured = np.asarray(measured_csi)
+            else:
+                measured = self.pls.measure_session_csi(msg)
+            pls_ok, similarity = self.pls.authenticate(reported_csi, measured)
 
         if not pls_ok:
             latency_ms = (time.perf_counter() - t0) * 1000

@@ -2,8 +2,7 @@
 """
 可解释的安全评分模型（研究/对比用，非国际标准等级）。
 
-维度与默认权重与 docs/RESEARCH_REPORT.md、docs/LITERATURE_AND_INNOVATION.md 中的
-“安全性得分”叙述一致，便于复现与论文制表。
+维度与默认权重见 docs/PROJECT.md 第五节 SecurityRubric。
 """
 from __future__ import annotations
 

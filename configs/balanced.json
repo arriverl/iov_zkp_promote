@@ -5,7 +5,9 @@
   "zkp_challenge_bytes": 16,
   "pqc_sign_digest": true,
   "zkp_witness_digest": true,
+  "zkp_mode": "sis_lattice_nizk",
   "pls": {
+    "mode": "simulation",
     "csi_dim": 32,
     "threshold": 0.88,
     "noise_std": 0.06,

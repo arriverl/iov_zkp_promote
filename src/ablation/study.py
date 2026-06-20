@@ -5,7 +5,7 @@ import statistics
 from typing import Dict, List
 
 from ..protocol import FusionAuthProtocol, IoVAuthFrame
-from ..zkp import ZKProof
+from ..zkp import ZKProof, verify_request
 
 
 def _verify_with_toggles(protocol: FusionAuthProtocol, req: dict, *, use_zkp: bool, use_pls: bool) -> Dict[str, float]:
@@ -14,7 +14,8 @@ def _verify_with_toggles(protocol: FusionAuthProtocol, req: dict, *, use_zkp: bo
 
     zkp_ok = True
     if use_zkp:
-        zkp_ok = protocol.zkp_verifier.verify(
+        zkp_ok = verify_request(
+            protocol.zkp_verifier,
             pk,
             msg,
             ZKProof(
@@ -22,6 +23,7 @@ def _verify_with_toggles(protocol: FusionAuthProtocol, req: dict, *, use_zkp: bo
                 response=req["zkp_response"],
                 challenge_digest=req["zkp_challenge_digest"],
             ),
+            req["reported_csi"],
         )
 
     pqc_ok = protocol.pqc.verify(protocol._pqc_payload(msg), req["signature"], pk)

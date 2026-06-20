@@ -29,7 +29,10 @@ def protocol_from_config(config: Dict[str, Any]) -> FusionAuthProtocol:
         pls_use_float32=bool(pls.get("use_float32", True)),
         pls_num_multipath=int(pls.get("num_multipath", 8)),
         pls_rel_dist_max=float(pls.get("rel_dist_max", 0.42)),
+        pls_csi_mode=str(pls.get("mode", "simulation")),
+        pls_csi_data_dir=pls.get("data_dir"),
         pqc_sign_digest=bool(config.get("pqc_sign_digest", True)),
         zkp_witness_digest=bool(config.get("zkp_witness_digest", True)),
+        zkp_mode=str(config.get("zkp_mode", "sis_lattice_nizk")),
         replay_cleanup_interval=int(config.get("replay_cleanup_interval", 32)),
     )

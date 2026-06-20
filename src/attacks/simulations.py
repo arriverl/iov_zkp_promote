@@ -75,4 +75,20 @@ def run_attack_suite(
         "notes": 0.0,
     })
 
+    # 5) ZKP–CSI 解耦：复用 ZKP 三元组，仅替换 reported_csi（PC-ZKP 创新对照）
+    swap_zkp_pass = 0
+    swap_full = 0
+    for i in range(rounds):
+        req = _fresh_request(protocol)
+        req2 = dict(req)
+        req2["reported_csi"] = protocol.pls.extract_session_csi(f"SWAP-{i}".encode())
+        r = protocol.rsu_verify(req2)
+        swap_zkp_pass += int(r.zkp_ok)
+        swap_full += int(r.success)
+    results.append({
+        "attack": "zkp_csi_decoupling",
+        "success_rate": swap_full / rounds,
+        "notes": swap_zkp_pass / rounds,
+    })
+
     return results

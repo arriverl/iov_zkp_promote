@@ -12,9 +12,9 @@ import statistics
 # 项目根目录加入 path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.pqc.lattice_signing import PQCLatticeSigner, measure_pqc_latency
-from src.zkp.sigma_proof import ZKPProver, ZKPVerifier, ZKProof
-from src.pls.csi_fingerprint import PLSAuthenticator
+from src.baselines.yang2023 import Yang2023IoVAuth, benchmark_yang2023_round
+from src.baselines.ecdh_aes_pseudonym import EcdhAesPseudonymAuth, benchmark_ecdh_aes_round
+from src.pqc.lattice_signing import measure_pqc_latency
 from src.protocol.fusion_protocol import FusionAuthProtocol
 from src.protocol.iov_auth_frame import IoVAuthFrame
 from src.evaluation.security_rubric import (
@@ -74,41 +74,57 @@ def benchmark_fusion_protocol(config: dict | None = None) -> dict:
 
 
 def benchmark_baseline_yang(config: dict | None = None) -> dict:
+    """
+    基线 Yang et al. (2023) FGCS — ECC 认证/密钥协商 + XOR 假名掩码。
+    本机 cryptography 原语实测（非 time.sleep）；非 NS-3 网络仿真。
+    """
     n_rounds = _rounds(config)
-    """
-    基线协议 (Yang et al. 2023) 模拟：仅 ECC 类签名 + XOR，无 PQC/ZKP/PLS。
-    假设单次 ECC 签名+验证约 0.05–0.1 ms 量级，通信约 256 B。
-    """
-    # 模拟：极快但无抗量子、隐私弱
-    latencies = []
+    proto = Yang2023IoVAuth()
+    rsu_id = b"RSU-YANG-BENCH"
+    route = b"ROUTE_SEGMENT_SH_A_TO_RSU_001"
+
+    rsu_latencies = []
+    e2e_latencies = []
+    comm_bytes = 0
     for _ in range(n_rounds):
-        t0 = time.perf_counter()
-        # 模拟 ECC 签名+验证
-        time.sleep(0.00008)  # ~0.08 ms
-        latencies.append((time.perf_counter() - t0) * 1000)
+        rsu_ms, e2e_ms, comm_bytes = benchmark_yang2023_round(proto, route, rsu_id)
+        rsu_latencies.append(rsu_ms)
+        e2e_latencies.append(e2e_ms)
+
     return {
-        "latency_ms_mean": statistics.mean(latencies),
-        "latency_ms_median": statistics.median(latencies),
-        "comm_bytes_total": 256,
-        "security_note": "ECC, no PQC/ZKP/PLS",
+        "latency_ms_mean": statistics.mean(rsu_latencies),
+        "latency_ms_median": statistics.median(rsu_latencies),
+        "e2e_latency_ms_mean": statistics.mean(e2e_latencies),
+        "comm_bytes_total": comm_bytes,
+        "implementation": "yang2023_crypto_replica",
+        "reference": "Yang et al. FGCS 145:415-428 (2023), DOI 10.1016/j.future.2023.04.004",
+        "security_note": "ECC+XOR, no PQC/ZKP/PLS",
     }
 
 
 def benchmark_improved_ecdh_aes(config: dict | None = None) -> dict:
+    """
+    改进基线 ECDH+AES-GCM 假名方案 — 本机 cryptography 实测。
+    """
     n_rounds = _rounds(config)
-    """
-    改进协议 (ECDH+AES) 模拟：密钥交换 + 对称加密，无 PQC，假名机制。
-    假设约 2–3 ms，512 B。
-    """
-    latencies = []
+    proto = EcdhAesPseudonymAuth()
+    rsu_id = b"RSU-ECDH-BENCH"
+
+    rsu_latencies = []
+    e2e_latencies = []
+    comm_bytes = 0
     for _ in range(n_rounds):
-        t0 = time.perf_counter()
-        time.sleep(0.00255)  # ~2.55 ms
-        latencies.append((time.perf_counter() - t0) * 1000)
+        rsu_ms, e2e_ms, comm_bytes = benchmark_ecdh_aes_round(proto, rsu_id)
+        rsu_latencies.append(rsu_ms)
+        e2e_latencies.append(e2e_ms)
+
     return {
-        "latency_ms_mean": statistics.mean(latencies),
-        "latency_ms_median": statistics.median(latencies),
-        "comm_bytes_total": 512,
+        "latency_ms_mean": statistics.mean(rsu_latencies),
+        "latency_ms_median": statistics.median(rsu_latencies),
+        "e2e_latency_ms_mean": statistics.mean(e2e_latencies),
+        "comm_bytes_total": comm_bytes,
+        "implementation": "ecdh_aes_gcm_replica",
+        "reference": "ECDH+AES-GCM pseudonym improvement over Yang XOR baseline",
         "security_note": "ECDH+AES, no PQC, pseudonym",
     }
 
@@ -118,12 +134,12 @@ def main() -> None:
     print("ZKP-PQC-PLS 融合架构 性能评估")
     print("=" * 60)
 
-    print("\n[1] 基线协议 (Yang et al. 2023) 模拟")
+    print("\n[1] 基线协议 (Yang et al. 2023) 密码学复现")
     b1 = benchmark_baseline_yang()
     print(f"    认证延迟: {b1['latency_ms_mean']:.2f} ms (median: {b1['latency_ms_median']:.2f})")
     print(f"    通信开销: {b1['comm_bytes_total']} Bytes")
 
-    print("\n[2] 改进协议 (ECDH+AES) 模拟")
+    print("\n[2] 改进协议 (ECDH+AES-GCM) 密码学复现")
     b2 = benchmark_improved_ecdh_aes()
     print(f"    认证延迟: {b2['latency_ms_mean']:.2f} ms (median: {b2['latency_ms_median']:.2f})")
     print(f"    通信开销: {b2['comm_bytes_total']} Bytes")
@@ -156,7 +172,7 @@ def main() -> None:
     print(f"    创新 (ZKP+PQC+PLS+IoVAuthFrame): {s3}")
     for line in explain_score(r3):
         print(line)
-    print("    详见 src/evaluation/security_rubric.py 与 docs/LITERATURE_AND_INNOVATION.md")
+    print("    详见 src/evaluation/security_rubric.py 与 docs/PROJECT.md")
 
     print("\n--- 对比小结 ---")
     print(f"  创新协议延迟 < 50 ms (IoV 实时性阈值): {b3['latency_ms_mean'] < 50}")

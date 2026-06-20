@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZKP-PQC-PLS 真算传输演示</title>
+  <style>
+    :root {
+      --bg: #070b14; --panel: #111827; --border: #1f2937; --text: #f1f5f9; --muted: #94a3b8;
+      --frame: #f59e0b; --zkp: #06b6d4; --pls: #10b981; --pqc: #8b5cf6; --wire: #3b82f6;
+      --ok: #22c55e; --fail: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    header {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;
+      background: rgba(17,24,39,.95); position: sticky; top: 0; z-index: 50;
+    }
+    header h1 { font-size: 1.25rem; }
+    header p { font-size: 0.8rem; color: var(--muted); }
+    .badge-live { background: rgba(34,197,94,.2); color: #86efac; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
+    .badge-off { background: rgba(239,68,68,.2); color: #fca5a5; }
+    .controls { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    button, select {
+      background: #1e293b; color: var(--text); border: 1px solid var(--border);
+      padding: 0.45rem 0.9rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+    }
+    button:hover { background: #334155; }
+    button.primary { background: #2563eb; border-color: #3b82f6; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    main { display: grid; grid-template-columns: 1fr 340px; gap: 1rem; padding: 1rem; max-width: 1400px; margin: 0 auto; }
+    @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+    .stage { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; min-height: 420px; }
+    .topology { display: grid; grid-template-columns: 140px 1fr 140px; align-items: center; margin: 2rem 0 1rem; min-height: 200px; }
+    .node { text-align: center; padding: 1rem 0.5rem; border-radius: 12px; border: 2px solid var(--border); background: #0f172a; transition: box-shadow .3s; }
+    .node.active { box-shadow: 0 0 24px rgba(59,130,246,.35); border-color: var(--wire); }
+    .node .icon { font-size: 2rem; }
+    .node .name { font-weight: 700; font-size: 0.95rem; }
+    .node .sub { font-size: 0.7rem; color: var(--muted); }
+    .channel { position: relative; height: 120px; border-radius: 8px; background: linear-gradient(90deg, rgba(59,130,246,.06), rgba(16,185,129,.06)); border: 1px dashed var(--border); }
+    .channel-label { position: absolute; top: -1.4rem; left: 50%; transform: translateX(-50%); font-size: 0.75rem; color: var(--muted); }
+    .wave { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(59,130,246,.08) 18px, rgba(59,130,246,.08) 20px); animation: wave 2s linear infinite; opacity: 0; }
+    .channel.transmitting .wave { opacity: 1; }
+    @keyframes wave { to { background-position: 40px 0; } }
+    .packet-train { position: absolute; top: 50%; left: 0; transform: translateY(-50%); display: flex; gap: 2px; opacity: 0; transition: left .05s linear, opacity .2s; z-index: 10; }
+    .packet-train.visible { opacity: 1; }
+    .chunk { height: 36px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+    .chunk-frame { background: var(--frame); }
+    .chunk-zkp { background: var(--zkp); }
+    .chunk-pls { background: var(--pls); }
+    .chunk-pqc-pk { background: #7c3aed; }
+    .chunk-pqc-sig { background: var(--pqc); }
+    .stack-bar { display: flex; height: 28px; border-radius: 6px; overflow: hidden; margin: 0.5rem 0; }
+    .stack-bar div { display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 600; }
+    .legend { display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.7rem; color: var(--muted); }
+    .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 0.25rem; }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 1rem; }
+    .metric { background: #0f172a; border-radius: 8px; padding: 0.6rem; text-align: center; border: 1px solid var(--border); }
+    .metric .v { font-size: 1.1rem; font-weight: 700; }
+    .metric .l { font-size: 0.65rem; color: var(--muted); }
+    .sidebar { display: flex; flex-direction: column; gap: 1rem; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 1rem; }
+    .panel h2 { font-size: 0.9rem; margin-bottom: 0.75rem; color: #93c5fd; }
+    .log { font-family: Consolas, monospace; font-size: 0.72rem; max-height: 300px; overflow-y: auto; color: var(--muted); }
+    .log .line { margin-bottom: 0.35rem; padding-left: 0.5rem; border-left: 2px solid transparent; }
+    .log .line.obu { border-color: var(--wire); color: #93c5fd; }
+    .log .line.tx { border-color: var(--frame); color: #fcd34d; }
+    .log .line.rsu { border-color: var(--pls); color: #6ee7b7; }
+    .log .line.ok { border-color: var(--ok); color: #86efac; }
+    .log .line.fail { border-color: var(--fail); color: #fca5a5; }
+    .verify-steps { list-style: none; }
+    .verify-steps li { padding: 0.45rem 0.6rem; margin-bottom: 0.35rem; border-radius: 6px; background: #0f172a; font-size: 0.78rem; display: flex; justify-content: space-between; border: 1px solid transparent; }
+    .verify-steps li.pending { color: var(--muted); }
+    .verify-steps li.running { border-color: var(--wire); color: #93c5fd; }
+    .verify-steps li.pass { border-color: var(--ok); color: #86efac; }
+    .verify-steps li.fail { border-color: var(--fail); color: #fca5a5; }
+    .result-banner { margin-top: 1rem; padding: 0.75rem; border-radius: 10px; text-align: center; font-weight: 700; display: none; }
+    .result-banner.show { display: block; }
+    .result-banner.ok { background: rgba(34,197,94,.15); color: #86efac; border: 1px solid var(--ok); }
+    .result-banner.fail { background: rgba(239,68,68,.15); color: #fca5a5; border: 1px solid var(--fail); }
+    .server-hint { background: rgba(239,68,68,.1); border: 1px solid var(--fail); color: #fca5a5; padding: 0.75rem 1rem; margin: 1rem; border-radius: 8px; font-size: 0.85rem; display: none; }
+    .server-hint.show { display: block; }
+    .server-hint code { color: #fde68a; }
+  </style>
+</head>
+<body>
+
+<div class="server-hint" id="serverHint">
+  未连接真算服务。请先运行：<code>python scripts/live_demo_server.py</code>，再访问 <code>http://127.0.0.1:8765/</code>
+</div>
+
+<header>
+  <div>
+    <h1>ZKP-PQC-PLS 真算传输演示 <span class="badge-live" id="liveBadge">LIVE</span></h1>
+    <p>后端真实执行 Dilithium2 + SIS-ZKP + PLS · 动画节奏来自实测分步耗时</p>
+  </div>
+  <div class="controls">
+    <select id="scenario">
+      <option value="normal">正常认证</option>
+      <option value="theft">盗证攻击</option>
+      <option value="replay">重放攻击</option>
+      <option value="tamper">消息篡改</option>
+      <option value="relay">远程中继</option>
+    </select>
+    <label style="font-size:0.8rem;color:var(--muted)">动画倍速
+      <input type="range" id="speed" min="0.3" max="3" step="0.1" value="1" style="width:80px;vertical-align:middle" />
+    </label>
+    <button id="btnPlay" class="primary">▶ 真算并播放</button>
+    <button id="btnReset">↺ 重置</button>
+    <a href="index.html" style="font-size:0.8rem;color:#60a5fa;text-decoration:none">总览</a>
+  </div>
+</header>
+
+<main>
+  <div class="stage">
+    <div class="topology">
+      <div class="node" id="nodeObu"><div class="icon">🚗</div><div class="name">OBU</div><div class="sub">真算构包</div></div>
+      <div class="channel" id="channel">
+        <div class="channel-label">V2I · 实测报文字节</div>
+        <div class="wave"></div>
+        <div class="packet-train" id="packetTrain"></div>
+      </div>
+      <div class="node" id="nodeRsu"><div class="icon">📡</div><div class="name">RSU</div><div class="sub">真算验证</div></div>
+    </div>
+    <div class="stack-bar" id="stackBar"></div>
+    <div class="legend" id="legend"></div>
+    <div class="metrics">
+      <div class="metric"><div class="v" id="mBytes">0</div><div class="l">已传输 (B)</div></div>
+      <div class="metric"><div class="v" id="mTotal">—</div><div class="l">总报文 (B)</div></div>
+      <div class="metric"><div class="v" id="mTime">0</div><div class="l">真算 E2E (ms)</div></div>
+      <div class="metric"><div class="v" id="mRho">—</div><div class="l">实测 ρ</div></div>
+    </div>
+    <div class="result-banner" id="resultBanner"></div>
+  </div>
+  <div class="sidebar">
+    <div class="panel">
+      <h2>RSU 验证流水线（真算结果）</h2>
+      <ul class="verify-steps" id="verifySteps">
+        <li data-step="replay" class="pending"><span>① Replay Guard</span><span>—</span></li>
+        <li data-step="zkp" class="pending"><span>② ZKP 验证</span><span>—</span></li>
+        <li data-step="pls" class="pending"><span>③ PLS CSI</span><span>—</span></li>
+        <li data-step="pqc" class="pending"><span>④ PQC 验签</span><span>—</span></li>
+      </ul>
+    </div>
+    <div class="panel" style="flex:1">
+      <h2>真算日志</h2>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API = '';  // 同源：由 live_demo_server.py 托管
+let PACKET = { frame: 0, zkp: 0, csi: 0, pk: 0, sig: 0, total: 0 };
+let running = false;
+let abort = false;
+
+const $ = id => document.getElementById(id);
+const logEl = $('log');
+
+function log(msg, cls = '') {
+  const line = document.createElement('div');
+  line.className = 'line ' + cls;
+  line.textContent = msg;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function sleep(ms) {
+  const speed = parseFloat($('speed').value) || 1;
+  const wait = Math.max(30, ms / speed);
+  return new Promise(r => setTimeout(r, wait));
+}
+
+function setNodeActive(id, on) { $(id).classList.toggle('active', on); }
+function setStep(name, state, detail = '—') {
+  const li = document.querySelector(`[data-step="${name}"]`);
+  if (!li) return;
+  li.className = state;
+  li.querySelector('span:last-child').textContent = detail;
+}
+function resetSteps() {
+  ['replay', 'zkp', 'pls', 'pqc'].forEach(s => setStep(s, 'pending', '—'));
+}
+
+function applyPacket(p) {
+  PACKET = { frame: p.frame, zkp: p.zkp, csi: p.csi, pk: p.pk, sig: p.sig, total: p.total };
+  $('mTotal').textContent = p.total;
+  const scale = 0.045;
+  const parts = [
+    ['chunk-frame', 'Frame', p.frame, 'var(--frame)'],
+    ['chunk-zkp', 'ZKP', p.zkp, 'var(--zkp)'],
+    ['chunk-pls', 'CSI', p.csi, 'var(--pls)'],
+    ['chunk-pqc-pk', 'PK', p.pk, '#7c3aed'],
+    ['chunk-pqc-sig', 'Sig', p.sig, 'var(--pqc)'],
+  ];
+  $('packetTrain').innerHTML = parts.map(([c, l, b]) =>
+    `<div class="chunk ${c}" style="width:${Math.max(18, b * scale)}px" title="${l} ${b}B">${l}</div>`
+  ).join('');
+  $('stackBar').innerHTML = parts.map(([, l, b, c]) =>
+    `<div style="width:${(b / p.total * 100).toFixed(1)}%;background:${c}" title="${l} ${b}B">${l}</div>`
+  ).join('');
+  $('legend').innerHTML = parts.map(([, l, b, c]) =>
+    `<span><i style="background:${c}"></i>${l} ${b}B</span>`
+  ).join('');
+}
+
+async function animateTransmit(totalBytes, animMs = 400) {
+  const channel = $('channel');
+  const train = $('packetTrain');
+  channel.classList.add('transmitting');
+  train.classList.add('visible');
+  const channelW = channel.offsetWidth;
+  const trainW = train.offsetWidth;
+  const steps = 30;
+  const stepMs = animMs / steps;
+  for (let i = 0; i <= steps; i++) {
+    if (abort) return;
+    const pct = i / steps;
+    train.style.left = `${pct * Math.max(0, channelW - trainW - 8)}px`;
+    $('mBytes').textContent = Math.round(totalBytes * pct);
+    await sleep(stepMs);
+  }
+  channel.classList.remove('transmitting');
+  $('mBytes').textContent = totalBytes;
+}
+
+function resetUI() {
+  abort = false;
+  running = false;
+  $('btnPlay').disabled = false;
+  $('mBytes').textContent = '0';
+  $('mTime').textContent = '0';
+  $('mRho').textContent = '—';
+  $('resultBanner').className = 'result-banner';
+  $('packetTrain').classList.remove('visible');
+  $('packetTrain').style.left = '0';
+  setNodeActive('nodeObu', false);
+  setNodeActive('nodeRsu', false);
+  resetSteps();
+  logEl.innerHTML = '';
+}
+
+async function checkHealth() {
+  try {
+    const r = await fetch(API + '/api/health');
+    if (!r.ok) throw new Error('health fail');
+    const j = await r.json();
+    $('liveBadge').textContent = 'LIVE · ' + j.profile;
+    $('liveBadge').className = 'badge-live';
+    $('serverHint').classList.remove('show');
+    return true;
+  } catch {
+    $('liveBadge').textContent = 'OFFLINE';
+    $('liveBadge').className = 'badge-live badge-off';
+    $('serverHint').classList.add('show');
+    return false;
+  }
+}
+
+async function runLive() {
+  if (running) return;
+  if (!await checkHealth()) {
+    log('错误：未连接真算服务，请先启动 live_demo_server.py', 'fail');
+    return;
+  }
+
+  running = true;
+  abort = false;
+  $('btnPlay').disabled = true;
+  resetUI();
+
+  const scenario = $('scenario').value;
+  log(`POST /api/round scenario=${scenario} …`, 'tx');
+
+  let data;
+  try {
+    const t0 = performance.now();
+    const res = await fetch(API + '/api/round', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scenario }),
+    });
+    const waitMs = performance.now() - t0;
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || res.statusText);
+    }
+    data = await res.json();
+    log(`服务端真算完成 (HTTP 往返 ${waitMs.toFixed(0)} ms)`, 'ok');
+  } catch (e) {
+    log('API 错误: ' + e.message, 'fail');
+    running = false;
+    $('btnPlay').disabled = false;
+    return;
+  }
+
+  applyPacket(data.packet);
+  $('mTime').textContent = data.e2e_ms;
+  if (data.pls_rho > 0 || scenario === 'theft' || scenario === 'relay') {
+    $('mRho').textContent = data.pls_rho.toFixed(4);
+  }
+
+  // 按真算 steps 播放动画
+  let obuMs = 0, rsuMs = 0;
+  for (const step of data.steps) {
+    if (abort) break;
+    const phase = step.phase;
+    const ms = step.ms || 0;
+    const line = `[${phase.toUpperCase()}] ${step.action}` +
+      (step.ms ? ` · ${step.ms} ms` : '') +
+      (step.bytes ? ` · ${step.bytes} B` : '') +
+      (step.detail ? ` — ${step.detail}` : '') +
+      (step.rho != null ? ` · ρ=${step.rho}` : '') +
+      (step.ok === false ? ' · FAIL' : step.ok === true ? ' · OK' : '');
+
+    if (phase === 'obu') {
+      setNodeActive('nodeObu', true);
+      log(line, 'obu');
+      obuMs += ms;
+      await sleep(Math.max(ms, 80));
+    } else if (phase === 'tx') {
+      setNodeActive('nodeObu', false);
+      log(line, 'tx');
+      if (step.bytes) await animateTransmit(step.bytes, 350);
+    } else if (phase === 'rsu') {
+      setNodeActive('nodeRsu', true);
+      const st = step.step;
+      if (st) {
+        setStep(st, 'running', '…');
+        await sleep(Math.max(ms, 60));
+        setStep(st, step.ok ? 'pass' : 'fail', step.ok ? (step.rho != null ? 'ρ=' + step.rho : 'PASS') : 'FAIL');
+      }
+      log(line, step.ok === false ? 'fail' : 'rsu');
+      rsuMs += ms;
+      if (step.ok === false) break;
+    } else if (phase === 'info') {
+      log(line, step.ok ? 'ok' : 'fail');
+    }
+  }
+
+  setNodeActive('nodeObu', false);
+  setNodeActive('nodeRsu', false);
+
+  const banner = $('resultBanner');
+  banner.className = 'result-banner show ' + (data.success ? 'ok' : 'fail');
+  banner.textContent = (data.success ? '✓ 真算认证通过' : '✗ 真算认证拒绝') +
+    ` — E2E ${data.e2e_ms} ms · RSU ${data.rsu_latency_ms} ms · OBU ${data.obu_build_ms} ms`;
+  log('结果: ' + data.details, data.success ? 'ok' : 'fail');
+
+  running = false;
+  $('btnPlay').disabled = false;
+}
+
+$('btnPlay').addEventListener('click', runLive);
+$('btnReset').addEventListener('click', () => { abort = true; resetUI(); });
+checkHealth().then(ok => {
+  log(ok ? '已连接真算服务，选择场景后点击「真算并播放」。' : '等待真算服务…', ok ? 'ok' : 'fail');
+});
+</script>
+</body>
+</html>

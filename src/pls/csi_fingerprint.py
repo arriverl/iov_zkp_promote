@@ -7,8 +7,11 @@
 from __future__ import annotations
 
 import numpy as np
-from typing import Tuple, Optional
+from pathlib import Path
+from typing import Tuple, Optional, Literal
 from dataclasses import dataclass
+
+from .real_csi_repository import RealCSIRepository, DEFAULT_DATA_DIR
 
 
 @dataclass
@@ -63,6 +66,8 @@ class PLSAuthenticator:
         multipath_decay: float = 0.3,
         use_float32: bool = True,
         rel_dist_max: float = 0.42,
+        csi_mode: Literal["simulation", "real"] = "simulation",
+        csi_data_dir: Optional[Path] = None,
         rng: Optional[np.random.Generator] = None,
     ):
         self.threshold = threshold
@@ -72,6 +77,17 @@ class PLSAuthenticator:
         self.num_multipath = num_multipath
         self.multipath_decay = multipath_decay
         self.use_float32 = use_float32
+        self.csi_mode = csi_mode
+        self._csi_repo: Optional[RealCSIRepository] = None
+        if csi_mode == "real":
+            self._csi_repo = RealCSIRepository(
+                data_dir=csi_data_dir or DEFAULT_DATA_DIR,
+                csi_dim=csi_dim,
+            )
+            if not self._csi_repo.available:
+                raise FileNotFoundError(
+                    f"PLS real 模式需要 CSI 数据，请先运行: python scripts/prepare_v2x_csi.py"
+                )
         self._rng = rng or np.random.default_rng()
         self._model = CSIFingerprintModel(
             dim=csi_dim,
@@ -112,10 +128,24 @@ class PLSAuthenticator:
 
     def extract_session_csi(self, message: bytes) -> np.ndarray:
         """同一会话消息绑定种子，OBU/RSU 合法链路一致。"""
+        if self.csi_mode == "real" and self._csi_repo is not None:
+            obu, _ = self._csi_repo.pick_legitimate(message)
+            return obu
         return self.extract_csi_fingerprint(seed=self.session_seed_from_message(message))
+
+    def measure_session_csi(self, message: bytes) -> np.ndarray:
+        """RSU 侧同链路测量 CSI（real 模式用配对 RSU 向量 + 可选噪声）。"""
+        if self.csi_mode == "real" and self._csi_repo is not None:
+            _, rsu = self._csi_repo.pick_legitimate(message)
+            # 真实 V2X 数据集中 OBU/RSU 已为同链路估计，噪声宜小于仿真模式
+            return rsu.astype(self._dtype())
+        return self.add_channel_noise(self.extract_session_csi(message))
 
     def extract_remote_csi(self, message: bytes) -> np.ndarray:
         """异地盗证：不同多径剖面 + 独立种子，与合法 CSI 低相关。"""
+        if self.csi_mode == "real" and self._csi_repo is not None:
+            _, rsu_foreign = self._csi_repo.pick_theft(message)
+            return rsu_foreign
         base = self.session_seed_from_message(message)
         remote_seed = base ^ 0xA5A5_5A5A_DEAD_BEEF
         rng = np.random.default_rng(remote_seed)

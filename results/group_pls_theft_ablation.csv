@@ -1,3 +1,3 @@
-﻿auth_success_rate,rounds,scenario
-0.0,30.0,certificate_theft_with_pls
-1.0,30.0,certificate_theft_without_pls
+﻿auth_success_rate,experiment_role,note,pls_verification,rounds,scenario,threat_model
+0.0,primary,PRIMARY: pls_verification=enabled — RSU compares reported vs measured CSI; theft blocked when channels differ,enabled,30.0,certificate_theft_with_pls,stolen_credentials_remote_rsu: attacker replays legal ZKP+PQC+reported_csi while RSU measures foreign-channel CSI
+1.0,control_counterfactual,CONTROL(counterfactual): pls_verification=disabled — simulates legacy crypto-only schemes without physical-layer second factor; not a security breach of full protocol,disabled,30.0,control_crypto_only_without_pls,stolen_credentials_remote_rsu: attacker replays legal ZKP+PQC+reported_csi while RSU measures foreign-channel CSI
